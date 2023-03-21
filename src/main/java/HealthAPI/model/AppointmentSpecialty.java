@@ -1,6 +1,7 @@
 package HealthAPI.model;
 
 public enum AppointmentSpecialty {
+
     MFR("Fisiatria"),
     FT("Fisioterapia"),
     TF("Terapia da fala"),
@@ -13,4 +14,5 @@ public enum AppointmentSpecialty {
     AppointmentSpecialty(String name) {
         this.name = name;
     }
+
 }

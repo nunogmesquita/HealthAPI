@@ -1,4 +1,4 @@
-package mindswap_2023;
+package academy.mindswap.HealthAPI;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

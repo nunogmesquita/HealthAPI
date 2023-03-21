@@ -1,8 +1,7 @@
 package HealthAPI.controller;
 
-import HealthAPI.dto.UserConverter;
+import HealthAPI.converter.UserConverter;
 import HealthAPI.dto.UserCreateDto;
-import HealthAPI.dto.UserDto;
 import HealthAPI.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,19 +26,19 @@ public class UserController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<UserDto>> myFirstEndPoint() {
-        List<UserDto> users = userService.getAllUsers();
+    public ResponseEntity<List<UserCreateDto>> myFirstEndPoint() {
+        List<UserCreateDto> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getById(@PathVariable Long id) {
-        UserDto users = userService.getUserById(id);
+    public ResponseEntity<UserCreateDto> getById(@PathVariable Long id) {
+        UserCreateDto users = userService.getUserById(id);
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserCreateDto user, BindingResult bindingResult) {
+    public ResponseEntity<UserCreateDto> createUser(@Valid @RequestBody UserCreateDto user, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
 
             List<FieldError> errors = bindingResult.getFieldErrors();
@@ -50,7 +49,7 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.CREATED);
         }
 
-        UserDto savedUser = userService.createUser(user);
+        UserCreateDto savedUser = userService.createUser(user);
         return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
 
