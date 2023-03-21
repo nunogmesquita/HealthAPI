@@ -1,7 +1,8 @@
 package HealthAPI.controller;
 
-import HealthAPI.dto.UserConverter;
-import HealthAPI.service.UserService;
+import HealthAPI.converter.AppointmentConverter;
+import HealthAPI.dto.AppointmentDto;
+import HealthAPI.service.AppointmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ public class AppointmentController {
 
     @GetMapping("/appointment")
     public ResponseEntity<AppointmentDto> getAppointmentBooked(@PathVariable Long id) {
-        AppointmentDto appointments = appointmentService.getAppointmentById;
+        AppointmentDto appointments = appointmentService.getAppointmentById(id);
         return new ResponseEntity<>(appointments, HttpStatus.OK);
     }
 

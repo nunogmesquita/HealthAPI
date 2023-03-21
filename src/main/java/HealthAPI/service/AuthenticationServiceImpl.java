@@ -3,7 +3,7 @@ package HealthAPI.service;
 import HealthAPI.converter.UserConverter;
 import HealthAPI.dto.AuthenticationRequest;
 import HealthAPI.dto.AuthenticationResponse;
-import HealthAPI.dto.UserCreateDto;
+import HealthAPI.dto.ClientCreateDto;
 import HealthAPI.model.Token;
 import HealthAPI.model.TokenType;
 import HealthAPI.model.User;
@@ -27,7 +27,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     UserConverter userConverter;
 
-    public AuthenticationResponse register(UserCreateDto request) {
+    public AuthenticationResponse register(ClientCreateDto request) {
         User user = userConverter.fromUserCreateDtoToUser(request);
         userRepository.save(user);
         String jwtToken = jwtService.generateToken(user);

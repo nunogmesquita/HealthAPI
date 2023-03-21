@@ -1,5 +1,7 @@
 package HealthAPI.service;
 
+import HealthAPI.converter.AppointmentConverter;
+import HealthAPI.dto.AppointmentDto;
 import HealthAPI.model.Appointment;
 import HealthAPI.repository.AppointmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,25 +20,23 @@ public class AppointmentServiceImpl implements AppointmentService{
     }
 
     @Override
-    public AppointmentDto bookAppointment(AppointmentCreateDto appointment) {
-
-        if(!userCreatedDto.getPassword().equals(userCreatedDto.getRetypePassword())){
-            throw new IllegalArgumentException("Invalid login.");
-        }
+    public AppointmentDto bookAppointment(AppointmentDto appointment) {
         return null;
     }
 
     @Override
     public AppointmentDto getAppointmentById(Long appointmentId) {
-        Appointment appointment = appointmentRepository.getReferenceById(appointmentId);
-        return appointmentConverter.fromAppointmentEntityToAppointmentDto(appointment);
+        return null;
+    }
+
+    @Override
+    public List<AppointmentDto> getAllAppointments() {
+        return null;
     }
 
     @Override
     public AppointmentDto updateAppointment(AppointmentDto appointmentDto) {
-        List<Appointment> appointmentsList = appointmentRepository.getReferenceById();
-
-        return new appointementDto;
+        return null;
     }
 
     @Override
