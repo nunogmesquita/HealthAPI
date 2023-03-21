@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("")
 public class UserController {
     private UserService userService;
     private UserConverter userConverter;
@@ -27,18 +28,21 @@ public class UserController {
     }
 
     @GetMapping("")
+    @Secured({"ROLE_ADMIN", "ROLE_COLLABORATOR", "ROLE_HEALTHCAREPROVIDER"})
     public ResponseEntity<List<UserDto>> myFirstEndPoint() {
         List<UserDto> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
+    @Secured({"ROLE_ADMIN", "ROLE_COLLABORATOR", "ROLE_HEALTHCAREPROVIDER"})
     public ResponseEntity<UserDto> getById(@PathVariable Long id) {
         UserDto users = userService.getUserById(id);
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @PostMapping
+    @Secured("ROLE_ADMIN")
     public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserCreateDto user, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
 

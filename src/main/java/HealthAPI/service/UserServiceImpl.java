@@ -29,21 +29,21 @@ public class UserServiceImpl implements UserService{
 
         User user = userConverter.fromUserCreateDtoToEntity(userCreatedDto);
         user = userRepository.save(user);
-        return userConverter.fromUserEntitytioUserDto(user);
+        return userConverter.fromUserEntityToUserDto(user);
 
     }
 
     @Override
     public UserDto getUserById(Long userId) {
         User user = userRepository.getReferenceById(userId);
-        return userConverter.fromUserEntitytioUserDto(user);
+        return userConverter.fromUserEntityToUserDto(user);
     }
 
     @Override
     public List<UserDto> getAllUsers() {
         List<User> users = userRepository.findAll();
         List<UserDto> userDtos = users.parallelStream()
-                .map(userConverter::fromUserEntitytioUserDto)
+                .map(userConverter::fromUserEntityToUserDto)
                 .toList();
         return userDtos;
     }
