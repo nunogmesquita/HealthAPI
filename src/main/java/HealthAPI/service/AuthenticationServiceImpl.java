@@ -1,6 +1,9 @@
 package HealthAPI.service;
 
-import HealthAPI.dto.UserConverter;
+import HealthAPI.converter.UserConverter;
+import HealthAPI.dto.AuthenticationRequest;
+import HealthAPI.dto.AuthenticationResponse;
+import HealthAPI.dto.UserCreateDto;
 import HealthAPI.model.Token;
 import HealthAPI.model.TokenType;
 import HealthAPI.model.User;
@@ -24,9 +27,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     UserConverter userConverter;
 
-    public AuthenticationResponse register(RegisterRequest request) {
-        User user = userConverter.fromAuthenticationRequestToEntity(request);
-        repository.save(user);
+    public AuthenticationResponse register(UserCreateDto request) {
+        User user = userConverter.fromUserCreateDtoToUser(request);
+        userRepository.save(user);
         String jwtToken = jwtService.generateToken(user);
         saveUserToken(user, jwtToken);
         return AuthenticationResponse.builder()
@@ -40,7 +43,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         request.getPassword()
                 )
         );
-        User user = repository.findByEmail(request.getEmail())
+        User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow();
         String jwtToken = jwtService.generateToken(user);
         revokeAllUserTokens(user);

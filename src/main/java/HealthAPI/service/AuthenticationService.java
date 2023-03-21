@@ -1,11 +1,14 @@
 package HealthAPI.service;
 
 
+import HealthAPI.dto.AuthenticationRequest;
+import HealthAPI.dto.AuthenticationResponse;
+import HealthAPI.dto.UserCreateDto;
 import HealthAPI.model.User;
 
 public interface AuthenticationService {
 
-    AuthenticationResponse register(RegisterRequest request);
+    AuthenticationResponse register(UserCreateDto request);
 
     AuthenticationResponse authenticate(AuthenticationRequest request);
 

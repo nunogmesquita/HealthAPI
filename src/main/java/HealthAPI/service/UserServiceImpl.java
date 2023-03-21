@@ -1,8 +1,7 @@
 package HealthAPI.service;
 
-import HealthAPI.dto.UserConverter;
+import HealthAPI.converter.UserConverter;
 import HealthAPI.dto.UserCreateDto;
-import HealthAPI.dto.UserDto;
 import HealthAPI.model.User;
 import HealthAPI.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,39 +21,35 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserDto createUser(UserCreateDto userCreatedDto) {
-        if(!userCreatedDto.getPassword().equals(userCreatedDto.getRetypePassword())){
-            throw new IllegalArgumentException("Passawords do not match");
-        }
-
-        User user = userConverter.fromUserCreateDtoToEntity(userCreatedDto);
+    public UserCreateDto createUser(UserCreateDto userCreatedDto) {
+        User user = userConverter.fromUserCreateDtoToUser(userCreatedDto);
         user = userRepository.save(user);
-        return userConverter.fromUserEntitytioUserDto(user);
+        return userConverter.fromUserToUserCreateDto(user);
 
     }
 
     @Override
-    public UserDto getUserById(Long userId) {
+    public UserCreateDto getUserById(Long userId) {
         User user = userRepository.getReferenceById(userId);
-        return userConverter.fromUserEntitytioUserDto(user);
+        return userConverter.fromUserToUserCreateDto(user);
     }
 
     @Override
-    public List<UserDto> getAllUsers() {
+    public List<UserCreateDto> getAllUsers() {
         List<User> users = userRepository.findAll();
-        List<UserDto> userDtos = users.parallelStream()
-                .map(userConverter::fromUserEntitytioUserDto)
+        List<UserCreateDto> userCreateDtos = users.parallelStream()
+                .map(userConverter::fromUserToUserCreateDto)
                 .toList();
-        return userDtos;
+        return userCreateDtos;
     }
 
     @Override
-    public UserDto updateUser(UserDto userDto) {
+    public UserCreateDto updateUser(UserCreateDto userCreateDto) {
         return null;
     }
 
     @Override
     public void deleteUser(Long userId) {
-
     }
+
 }
