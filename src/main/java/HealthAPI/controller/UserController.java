@@ -1,12 +1,14 @@
 package HealthAPI.controller;
 
-import HealthAPI.converter.UserConverter;
+import HealthAPI.dto.UserConverter;
 import HealthAPI.dto.UserCreateDto;
+import HealthAPI.dto.UserDto;
 import HealthAPI.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("")
 public class UserController {
     private UserService userService;
     private UserConverter userConverter;
@@ -26,19 +28,22 @@ public class UserController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<UserCreateDto>> myFirstEndPoint() {
-        List<UserCreateDto> users = userService.getAllUsers();
+    @Secured({"ROLE_ADMIN", "ROLE_COLLABORATOR", "ROLE_HEALTHCAREPROVIDER"})
+    public ResponseEntity<List<UserDto>> myFirstEndPoint() {
+        List<UserDto> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserCreateDto> getById(@PathVariable Long id) {
-        UserCreateDto users = userService.getUserById(id);
+    @Secured({"ROLE_ADMIN", "ROLE_COLLABORATOR", "ROLE_HEALTHCAREPROVIDER"})
+    public ResponseEntity<UserDto> getById(@PathVariable Long id) {
+        UserDto users = userService.getUserById(id);
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<UserCreateDto> createUser(@Valid @RequestBody UserCreateDto user, BindingResult bindingResult) {
+    @Secured("ROLE_ADMIN")
+    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserCreateDto user, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
 
             List<FieldError> errors = bindingResult.getFieldErrors();
@@ -49,7 +54,7 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.CREATED);
         }
 
-        UserCreateDto savedUser = userService.createUser(user);
+        UserDto savedUser = userService.createUser(user);
         return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
 
