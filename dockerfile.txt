@@ -1,0 +1,6 @@
+FROM openjdk:19-alpine
+LABEL maintainer="Nuno Mesquita, Susana Gandra"
+ADD target/HealthAPI-0.0.1-SNAPSHOT.jar health_api.jar
+EXPOSE 8080
+ENV MYSQL_HOST "mysqldb"
+ENTRYPOINT ["java", "-jar", "health_api.jar"]
