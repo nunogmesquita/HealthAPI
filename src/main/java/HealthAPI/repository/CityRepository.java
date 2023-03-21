@@ -6,7 +6,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface CityRepository extends JpaRepository<City, Integer> {
+public interface CityRepository extends JpaRepository<City, Long> {
 
     List<City> findByStateId(@Param("id") Integer id);
 

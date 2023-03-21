@@ -2,7 +2,6 @@ package HealthAPI.service;
 
 import HealthAPI.converter.AppointmentConverter;
 import HealthAPI.dto.AppointmentDto;
-import HealthAPI.model.Appointment;
 import HealthAPI.repository.AppointmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,7 +19,7 @@ public class AppointmentServiceImpl implements AppointmentService{
     }
 
     @Override
-    public AppointmentDto bookAppointment(AppointmentDto appointment) {
+    public AppointmentDto bookAppointment() {
         return null;
     }
 

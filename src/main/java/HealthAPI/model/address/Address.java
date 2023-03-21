@@ -11,14 +11,17 @@ import lombok.Setter;
 @Setter
 public class Address {
 
+    @Column(nullable = false)
     String street;
 
-    City city;
-
+    @Column(nullable = false)
     State state;
 
     @Column(nullable = false)
-    @Pattern(regexp = "^\\d{4}(-\\d{3})?$", message = "Please insert a valid zipcode")
+    City city;
+
+    @Column(nullable = false)
+    @Pattern(regexp = "^\\d{4}(-\\d{3})?$", message = "Please insert a valid zipcode.")
     String zipCode;
 
 }

@@ -1,12 +1,15 @@
 package HealthAPI.service;
 
+import HealthAPI.converter.ClientConverter;
 import HealthAPI.converter.UserConverter;
 import HealthAPI.dto.AuthenticationRequest;
 import HealthAPI.dto.AuthenticationResponse;
 import HealthAPI.dto.ClientCreateDto;
+import HealthAPI.model.Client;
 import HealthAPI.model.Token;
 import HealthAPI.model.TokenType;
 import HealthAPI.model.User;
+import HealthAPI.repository.ClientRepository;
 import HealthAPI.repository.TokenRepository;
 import HealthAPI.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,22 +19,25 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
+    private final ClientRepository clientRepository;
     private final TokenRepository tokenRepository;
+    private final ClientConverter clientConverter;
+    private final UserConverter userConverter;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    UserConverter userConverter;
 
     public AuthenticationResponse register(ClientCreateDto request) {
-        User user = userConverter.fromUserCreateDtoToUser(request);
-        userRepository.save(user);
-        String jwtToken = jwtService.generateToken(user);
-        saveUserToken(user, jwtToken);
+        Client client = clientConverter.fromClientDtoToClient(request);
+        clientRepository.save(client);
+        String jwtToken = jwtService.generateToken(client);
+        saveClientToken(client, jwtToken);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
@@ -43,14 +49,31 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         request.getPassword()
                 )
         );
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow();
+        Optional<User> user = userRepository.findByEmail(request.getEmail());
+        if (user.isEmpty()) {
+            Client client = clientRepository.findByEmail(request.getEmail())
+                    .orElseThrow();
+            String jwtToken = jwtService.generateToken(client);
+
+        }
         String jwtToken = jwtService.generateToken(user);
         revokeAllUserTokens(user);
         saveUserToken(user, jwtToken);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
+    }
+
+    @Override
+    public void saveClientToken(Client client, String jwtToken) {
+        Token token = Token.builder()
+                .user(user)
+                .token(jwtToken)
+                .tokenType(TokenType.BEARER)
+                .expired(false)
+                .revoked(false)
+                .build();
+        tokenRepository.save(token);
     }
 
     @Override
@@ -63,7 +86,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .revoked(false)
                 .build();
         tokenRepository.save(token);
-
     }
 
     public void revokeAllUserTokens(User user) {

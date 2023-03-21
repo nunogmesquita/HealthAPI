@@ -1,6 +1,6 @@
 package HealthAPI.service;
 
-import HealthAPI.dto.UserConverter;
+import HealthAPI.converter.UserConverter;
 import HealthAPI.dto.UserCreateDto;
 import HealthAPI.dto.UserDto;
 import HealthAPI.model.User;
@@ -22,34 +22,30 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserDto createUser(UserCreateDto userCreatedDto) {
-        if(!userCreatedDto.getPassword().equals(userCreatedDto.getRetypePassword())){
-            throw new IllegalArgumentException("Passawords do not match");
-        }
-
-        User user = userConverter.fromUserCreateDtoToEntity(userCreatedDto);
+    public UserCreateDto createUser(UserCreateDto userCreatedDto) {
+        User user = userConverter.fromUserCreateDtoToUser(userCreatedDto);
         user = userRepository.save(user);
-        return userConverter.fromUserEntityToUserDto(user);
+        return userConverter.fromUserToUserCreateDto(user);
 
     }
 
     @Override
-    public UserDto getUserById(Long userId) {
+    public UserCreateDto getUserById(Long userId) {
         User user = userRepository.getReferenceById(userId);
-        return userConverter.fromUserEntityToUserDto(user);
+        return userConverter.fromUserToUserCreateDto(user);
     }
 
     @Override
     public List<UserDto> getAllUsers() {
         List<User> users = userRepository.findAll();
         List<UserDto> userDtos = users.parallelStream()
-                .map(userConverter::fromUserEntityToUserDto)
+                .map(userConverter::fromUserToUserDto)
                 .toList();
         return userDtos;
     }
 
     @Override
-    public UserDto updateUser(UserDto userDto) {
+    public UserCreateDto updateUser(Long id, UserCreateDto userDot) {
         return null;
     }
 
