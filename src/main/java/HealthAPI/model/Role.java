@@ -4,7 +4,6 @@ public enum Role {
 
     ADMIN,
     HEALTHCAREPROVIDER,
-    CLIENT,
     COLLABORATOR;
 
 }

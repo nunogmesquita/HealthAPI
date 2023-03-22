@@ -1,6 +1,7 @@
 package HealthAPI.service;
 
 import HealthAPI.converter.UserConverter;
+import HealthAPI.dto.UpdateUserDto;
 import HealthAPI.dto.UserCreateDto;
 import HealthAPI.dto.UserDto;
 import HealthAPI.model.User;
@@ -22,20 +23,6 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserCreateDto createUser(UserCreateDto userCreatedDto) {
-        User user = userConverter.fromUserCreateDtoToUser(userCreatedDto);
-        user = userRepository.save(user);
-        return userConverter.fromUserToUserCreateDto(user);
-
-    }
-
-    @Override
-    public UserCreateDto getUserById(Long userId) {
-        User user = userRepository.getReferenceById(userId);
-        return userConverter.fromUserToUserCreateDto(user);
-    }
-
-    @Override
     public List<UserDto> getAllUsers() {
         List<User> users = userRepository.findAll();
         List<UserDto> userDtos = users.parallelStream()
@@ -45,12 +32,38 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserCreateDto updateUser(Long id, UserCreateDto userDot) {
-        return null;
+    public UserDto getUserById(Long userId) {
+        User user = userRepository.getReferenceById(userId);
+        return userConverter.fromUserToUserDto(user);
+    }
+
+    public UserDto getUserByToken(String jwt){
+        User user = userRepository.findByToken(jwt);
+        return userConverter.fromUserToUserDto(user);
+    }
+
+    @Override
+    public UserCreateDto createUser(UserCreateDto userCreatedDto) {
+        User user = userConverter.fromUserCreateDtoToUser(userCreatedDto);
+        user = userRepository.save(user);
+        return userConverter.fromUserToUserCreateDto(user);
+    }
+
+    @Override
+    public UserDto updateUser(Long id, UserCreateDto userCreateDto) {
+        User user = userRepository.getReferenceById(id);
+        user.setFirstName(userCreateDto.getFirstName());
+        user.setLastName(userCreateDto.getLastName());
+        user.setPassword(userCreateDto.getPassword());
+        user.setRole(userCreateDto.getRole());
+        user.setEmail(userCreateDto.getEmail());
+        userRepository.save(user);
+        return userConverter.fromUserToUserDto(user);
     }
 
     @Override
     public void deleteUser(Long userId) {
-
+        userRepository.deleteById(userId);
     }
+
 }

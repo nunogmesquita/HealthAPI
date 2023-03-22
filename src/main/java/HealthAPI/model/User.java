@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -17,6 +19,8 @@ import java.util.Collection;
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
+@SQLDelete(sql = "UPDATE users SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class User implements UserDetails{
 
     @Id
@@ -24,10 +28,10 @@ public class User implements UserDetails{
     private Long id;
 
     @Column(nullable = false)
-    String name;
+    String firstName;
 
     @Column(nullable = false)
-    String userName;
+    String lastName;
 
     @Column(nullable = false, unique = true)
     @Pattern(regexp = "^((?!\\.)[\\w-_.]*[^.])(@\\w+)(\\.\\w+(\\.\\w+)?[^.\\W])$", message = "Please insert a valid email.")
@@ -39,6 +43,8 @@ public class User implements UserDetails{
 
     @NotBlank(message = "Must have role")
     private Role role;
+
+    private boolean deleted = Boolean.FALSE;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

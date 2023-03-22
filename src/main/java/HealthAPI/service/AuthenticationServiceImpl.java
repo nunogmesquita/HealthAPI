@@ -1,25 +1,19 @@
 package HealthAPI.service;
 
 import HealthAPI.converter.ClientConverter;
-import HealthAPI.converter.UserConverter;
 import HealthAPI.dto.AuthenticationRequest;
 import HealthAPI.dto.AuthenticationResponse;
 import HealthAPI.dto.ClientCreateDto;
-import HealthAPI.model.Client;
-import HealthAPI.model.Token;
-import HealthAPI.model.TokenType;
-import HealthAPI.model.User;
+import HealthAPI.model.*;
 import HealthAPI.repository.ClientRepository;
 import HealthAPI.repository.TokenRepository;
 import HealthAPI.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,8 +22,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final ClientRepository clientRepository;
     private final TokenRepository tokenRepository;
     private final ClientConverter clientConverter;
-    private final UserConverter userConverter;
-    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
@@ -43,19 +35,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .build();
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    @Override
+    public AuthenticationResponse authenticateUser(AuthenticationRequest request) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword()
                 )
         );
-        Optional<User> user = userRepository.findByEmail(request.getEmail());
-        if (user.isEmpty()) {
-            Client client = clientRepository.findByEmail(request.getEmail())
-                    .orElseThrow();
-            String jwtToken = jwtService.generateToken(client);
-
-        }
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow();
         String jwtToken = jwtService.generateToken(user);
         revokeAllUserTokens(user);
         saveUserToken(user, jwtToken);
@@ -64,16 +52,32 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .build();
     }
 
+    public AuthenticationResponse authenticateClient(AuthenticationRequest request) {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+        Client client = clientRepository.findByEmail(request.getEmail())
+                .orElseThrow();
+        String jwtToken = jwtService.generateToken(client);
+        revokeAllClientTokens(client);
+        saveClientToken(client, jwtToken);
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .build();
+    }
+
     @Override
     public void saveClientToken(Client client, String jwtToken) {
-        Token token = Token.builder()
-                .user(user)
+        Token clientToken = Token.builder()
+                .client(client)
                 .token(jwtToken)
                 .tokenType(TokenType.BEARER)
                 .expired(false)
                 .revoked(false)
                 .build();
-        tokenRepository.save(token);
+        tokenRepository.save(clientToken);
     }
 
     @Override
@@ -99,4 +103,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         });
         tokenRepository.saveAll(validUserTokens);
     }
+
+    public void revokeAllClientTokens(Client client) {
+        List<Token> validUserTokens = tokenRepository.findAllValidTokenByClient(client.getId());
+        if (validUserTokens.isEmpty()) {
+            return;
+        }
+        validUserTokens.forEach(token -> {
+            token.setExpired(true);
+            token.setRevoked(true);
+        });
+        tokenRepository.saveAll(validUserTokens);
+    }
+
 }
