@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 
 @Getter
-public class UserCreateDto {
+public class UpdateUserDto {
 
     @Column(nullable = false)
     String firstName;
@@ -26,6 +26,4 @@ public class UserCreateDto {
                     "1 lowercase letter, 1 non-alpha numeric number and have 8-16 characters with no space")
     String password;
 
-    @NotBlank(message = "Must have role")
-    private Role role;
 }

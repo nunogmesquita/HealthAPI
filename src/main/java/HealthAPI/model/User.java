@@ -4,27 +4,33 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
 
 @Getter
 @Setter
 @Builder
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
-public abstract class User implements UserDetails {
+@SQLDelete(sql = "UPDATE users SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
+public class User implements UserDetails{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    String name;
+    String firstName;
 
     @Column(nullable = false)
-    String userName;
+    String lastName;
 
     @Column(nullable = false, unique = true)
     @Pattern(regexp = "^((?!\\.)[\\w-_.]*[^.])(@\\w+)(\\.\\w+(\\.\\w+)?[^.\\W])$", message = "Please insert a valid email.")
@@ -35,6 +41,52 @@ public abstract class User implements UserDetails {
     String password;
 
     @NotBlank(message = "Must have role")
+    @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private HealthCareSpecialty healthCareSpecialty;
+
+    private boolean deleted = Boolean.FALSE;
+
+    @Override
+    public String toString() {
+        return "HealthCareProvider{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", healthCareSpecialty=" + healthCareSpecialty +
+                '}';
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
+    }
+
+    @Override
+    public String getUsername() {
+        return null;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return false;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return false;
+    }
 }

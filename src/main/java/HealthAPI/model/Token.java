@@ -29,10 +29,10 @@ public class Token {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    public Client client;
+    public User user;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    public User user;
+    @JoinColumn(name = "client_id")
+    public Client client;
 
 }

@@ -1,46 +1,105 @@
 package HealthAPI.service;
 
-import HealthAPI.converter.AppointmentConverter;
-import HealthAPI.dto.AppointmentDto;
+import HealthAPI.dto.TimeSlotBookingRequest;
 import HealthAPI.model.Appointment;
+import HealthAPI.model.Status;
+import HealthAPI.model.TimeSlot;
 import HealthAPI.repository.AppointmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-public class AppointmentServiceImpl implements AppointmentService{
+@Service
+public class AppointmentServiceImpl implements AppointmentService {
 
     private AppointmentRepository appointmentRepository;
-    private AppointmentConverter appointmentConverter;
 
     @Autowired
-    public AppointmentServiceImpl(AppointmentRepository appointmentRepository, AppointmentConverter appointmentConverter) {
+    public AppointmentServiceImpl(AppointmentRepository appointmentRepository) {
         this.appointmentRepository = appointmentRepository;
-        this.appointmentConverter = appointmentConverter;
     }
 
-    @Override
-    public AppointmentDto bookAppointment(AppointmentDto appointment) {
+    public Appointment createAppointment(TimeSlotBookingRequest timeSlotRequest) {
+        Appointment appointment = Appointment.builder()
+                .appointmentDate(timeSlotRequest.getBookingDate())
+                .hcpId(timeSlotRequest.getHcpId())
+                .clientId(timeSlotRequest.getClientId())
+                .timeSlotId(timeSlotRequest.getTimeSlotId())
+                .build();
+
+        appointmentRepository.save(appointment);
+
+        return appointment;
+    }
+
+    public List<Appointment> findAppointmentByTimeSlot(TimeSlot currentTimeSlot, Long clientId) {
+        return appointmentRepository.findAllByTimeSlotIdAndHcpIdAndClientId(
+                currentTimeSlot.getId(),
+                currentTimeSlot.getHcpId(), clientId);
+    }
+
+    public List<Appointment> findBookedAppointment(TimeSlot currentTimeSlot) {
+        return appointmentRepository.findAllByTimeSlotIdAndHcpId(currentTimeSlot.getId(), currentTimeSlot.getHcpId());
+    }
+
+    public boolean alreadyExist(TimeSlotBookingRequest timeSlotRequest, Long epochRequestedDate) {
+
+        List<Appointment> appointmentList = appointmentRepository
+                .findAllByTimeSlotIdAndHcpIdAndClientId(timeSlotRequest.getTimeSlotId(),
+                        timeSlotRequest.getHcpId(), timeSlotRequest.getClientId());
+
+        for (Appointment appointment : appointmentList) {
+            Long epochBookedDate = TimeSlotService.getLocalDate(appointment.getAppointmentDate())
+                    .toEpochDay();
+
+            if (epochBookedDate.equals(epochRequestedDate)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public Appointment findById(Long id) {
+        if (appointmentRepository.findById(id).isPresent()) {
+            Appointment appointment = appointmentRepository.findById(id).get();
+            return appointment;
+        }
         return null;
     }
 
-    @Override
-    public AppointmentDto getAppointmentById(Long appointmentId) {
+    public Appointment deleteById(Long id) {
+        Appointment fetchedAppointment = findById(id);
+        if (fetchedAppointment != null) {
+            fetchedAppointment.setSTATUS(Status.INACTIVE);
+
+            appointmentRepository.save(fetchedAppointment);
+            return fetchedAppointment;
+        }
         return null;
     }
 
-    @Override
-    public List<AppointmentDto> getAllAppointments() {
+    public ResponseEntity<?> restoreById(Long id) {
+        if (appointmentRepository.findById(id).isPresent()) {
+            Appointment fetchedAppointment = appointmentRepository.findById(id).get();
+            if (fetchedAppointment.getSTATUS().equals(Status.ACTIVE)) {
+                return ResponseEntity.badRequest().body("Already ACTIVE");
+            } else {
+                fetchedAppointment.setSTATUS(Status.ACTIVE);
+                appointmentRepository.save(fetchedAppointment);
+                return ResponseEntity.ok(fetchedAppointment);
+            }
+        }
         return null;
     }
 
-    @Override
-    public AppointmentDto updateAppointment(AppointmentDto appointmentDto) {
-        return null;
+    public List<Appointment> findAllByClientId(Long clientId) {
+        return appointmentRepository.findAllByClientIdAndSTATUS(clientId, Status.ACTIVE);
     }
 
-    @Override
-    public void deleteAppointment(Long appointmentId) {
-
+    public List<Appointment> findAllByHcpId(Long hcpId) {
+        return appointmentRepository.findAllByHcpIdAndSTATUS(hcpId, Status.ACTIVE);
     }
 }

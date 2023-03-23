@@ -1,14 +1,19 @@
 package HealthAPI.converter;
 
 import HealthAPI.dto.ClientCreateDto;
+import HealthAPI.dto.ClientDto;
 import HealthAPI.model.Client;
 import org.mapstruct.Mapper;
 
 @Mapper
 public interface ClientConverter {
 
-    Client fromClientDtoToClient(ClientCreateDto clientCreateDto);
+    Client fromClientCreateDtoToClient(ClientCreateDto clientCreateDto);
 
-    ClientCreateDto fromClientToClientDto(Client client);
+    ClientCreateDto fromClientToClientCreateDto(Client client);
+
+    Client fromClientDtoToClient(ClientDto clientDto);
+
+    ClientDto fromClientToClientDto(Client client);
 
 }
