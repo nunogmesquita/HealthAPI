@@ -1,19 +1,38 @@
 package HealthAPI.model;
 
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.Date;
 
 @Entity
+@Builder
+@Getter
+@Setter
 @Table(name = "appointments")
 public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
+    Date appointmentDate;
+
     @Column(nullable = false)
     AppointmentType appointmentType;
+
     @OneToOne
-    TimeSlot timeSlot;
+    Long timeSlotId;
+
     @OneToMany
-    Client client;
+    Long clientId;
+
     @OneToMany
-    private User user;
+    Long hcpId;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    Status STATUS;
 }

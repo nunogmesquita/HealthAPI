@@ -32,6 +32,10 @@ public class Client implements UserDetails {
     @Column(nullable = false)
     String userName;
 
+    @Column(nullable = false)
+    @Pattern(regexp = "/^([9][1236])[0-9]*$/", message = "Please insert a valid phone number.")
+    int phoneNumber;
+
     @Column(nullable = false, unique = true)
     @Pattern(regexp = "^((?!\\.)[\\w-_.]*[^.])(@\\w+)(\\.\\w+(\\.\\w+)?[^.\\W])$", message = "Please insert a valid email.")
     String email;

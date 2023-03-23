@@ -14,7 +14,6 @@ import java.util.Collection;
 @Getter
 @Setter
 @Builder
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -50,6 +49,16 @@ public class User implements UserDetails{
     private HealthCareSpecialty healthCareSpecialty;
 
     private boolean deleted = Boolean.FALSE;
+
+    @Override
+    public String toString() {
+        return "HealthCareProvider{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", healthCareSpecialty=" + healthCareSpecialty +
+                '}';
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

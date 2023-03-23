@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static HealthAPI.model.Role.HEALTHCAREPROVIDER;
+
 @Service
 public class UserServiceImpl implements UserService{
     private UserRepository userRepository;
@@ -37,9 +39,8 @@ public class UserServiceImpl implements UserService{
         return userConverter.fromUserToUserDto(user);
     }
 
-    public UserDto getUserByToken(String jwt){
-        User user = userRepository.findByToken(jwt);
-        return userConverter.fromUserToUserDto(user);
+    public User getUserByToken(String jwt){
+        return userRepository.findByToken(jwt);
     }
 
     @Override
@@ -62,8 +63,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserDto updateMyAccount(Long id, UpdateUserDto updateUserDto) {
-        User user = userRepository.getReferenceById(id);
+    public UserDto updateMyAccount(User user, UpdateUserDto updateUserDto) {
         user.setFirstName(updateUserDto.getFirstName());
         user.setLastName(updateUserDto.getLastName());
         user.setEmail(updateUserDto.getEmail());
@@ -75,6 +75,13 @@ public class UserServiceImpl implements UserService{
     @Override
     public void deleteUser(Long userId) {
         userRepository.deleteById(userId);
+    }
+
+    @Override
+    public List<User> getHealthCareProviders() {
+        List<User> hcp = userRepository.findByRole(HEALTHCAREPROVIDER);
+        hcp.forEach(user -> user.toString());
+        return hcp.stream().toList();
     }
 
 }

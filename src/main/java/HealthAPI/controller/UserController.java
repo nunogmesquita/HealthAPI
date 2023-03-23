@@ -2,6 +2,7 @@ package HealthAPI.controller;
 
 import HealthAPI.converter.UserConverter;
 import HealthAPI.dto.*;
+import HealthAPI.model.User;
 import HealthAPI.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -15,6 +16,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/user")
@@ -46,8 +48,9 @@ public class UserController {
     @GetMapping("/myAccount")
     public ResponseEntity<UserDto> getMyAccount(@NonNull HttpServletRequest request) {
         String jwt = request.getHeader("Authorization").substring(7);
-        UserDto user = userService.getUserByToken(jwt);
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        User user = userService.getUserByToken(jwt);
+        UserDto userDto= userConverter.fromUserToUserDto(user);
+        return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
 
     @PostMapping("")
@@ -74,7 +77,7 @@ public class UserController {
 
     @PatchMapping("/myAccount")
     @Secured({"ROLE_ADMIN", "ROLE_COLLABORATOR", "ROLE_HEALTHCAREPROVIDERS"})
-    public ResponseEntity<UserDto> updateMyAccount(@NonNull HttpServletRequest request,@PathVariable Long id, @Valid @RequestBody UpdateUserDto updateUserDto, BindingResult bindingResult) {
+    public ResponseEntity<UserDto> updateMyAccount(@NonNull HttpServletRequest request, @Valid @RequestBody UpdateUserDto updateUserDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
 
             List<FieldError> errors = bindingResult.getFieldErrors();
@@ -83,9 +86,9 @@ public class UserController {
             }
         }
         String jwt = request.getHeader("Authorization").substring(7);
-        UserDto user = userService.getUserByToken(jwt);
-        UserDto userUpdated = userService.updateMyAccount(id, updateUserDto);
-        return new ResponseEntity<>(userUpdated, HttpStatus.OK);
+        User user = userService.getUserByToken(jwt);
+        UserDto updatedUser = userService.updateMyAccount(user, updateUserDto);
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

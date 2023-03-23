@@ -2,7 +2,6 @@ package HealthAPI.controller;
 
 import HealthAPI.converter.UserConverter;
 import HealthAPI.dto.AppointmentDto;
-import HealthAPI.dto.UserCreateDto;
 import HealthAPI.dto.UserDto;
 import HealthAPI.service.AppointmentService;
 import HealthAPI.service.UserService;
@@ -32,12 +31,6 @@ public class InfoController {
     public ResponseEntity<List<UserDto>> getAppointmentSpeciality (@PathVariable String speciality) {
         List<UserDto> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
-    }
-
-    @GetMapping("/{appointment}")
-    public ResponseEntity<AppointmentDto> getAppointmentType (@PathVariable String type) {
-        AppointmentDto appointments = (AppointmentDto) appointmentService.getAppointmentType();
-        return new ResponseEntity<>(appointments, HttpStatus.OK);
     }
 
 }

@@ -26,7 +26,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(ClientCreateDto request) {
-        Client client = clientConverter.fromClientDtoToClient(request);
+        Client client = clientConverter.fromClientCreateDtoToClient(request);
         clientRepository.save(client);
         String jwtToken = jwtService.generateToken(client);
         saveClientToken(client, jwtToken);
