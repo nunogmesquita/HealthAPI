@@ -62,6 +62,17 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public UserDto updateMyAccount(Long id, UpdateUserDto updateUserDto) {
+        User user = userRepository.getReferenceById(id);
+        user.setFirstName(updateUserDto.getFirstName());
+        user.setLastName(updateUserDto.getLastName());
+        user.setEmail(updateUserDto.getEmail());
+        user.setPassword(updateUserDto.getPassword());
+        userRepository.save(user);
+        return userConverter.fromUserToUserDto(user);
+    }
+
+    @Override
     public void deleteUser(Long userId) {
         userRepository.deleteById(userId);
     }

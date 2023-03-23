@@ -21,7 +21,6 @@ import java.util.List;
 public class UserController {
 
     private UserService userService;
-
     private UserConverter userConverter;
 
     @Autowired
@@ -73,16 +72,21 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
-    //TODO update my account
-    /*
     @PatchMapping("/myAccount")
     @Secured({"ROLE_ADMIN", "ROLE_COLLABORATOR", "ROLE_HEALTHCAREPROVIDERS"})
-    public ResponseEntity<UpdateUserDto> getMyAccount(@NonNull HttpServletRequest request, @Valid @RequestBody UpdateUserDto updateUserDto) {
+    public ResponseEntity<UserDto> updateMyAccount(@NonNull HttpServletRequest request,@PathVariable Long id, @Valid @RequestBody UpdateUserDto updateUserDto, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+
+            List<FieldError> errors = bindingResult.getFieldErrors();
+            for (FieldError error : errors) {
+                System.out.println(error.getObjectName() + " - " + error.getDefaultMessage());
+            }
+        }
         String jwt = request.getHeader("Authorization").substring(7);
         UserDto user = userService.getUserByToken(jwt);
-        UpdateUserDto userUpdated = userService.updateMyAccount(user)
-        return new ResponseEntity<>(user, HttpStatus.OK);
-    }*/
+        UserDto userUpdated = userService.updateMyAccount(id, updateUserDto);
+        return new ResponseEntity<>(userUpdated, HttpStatus.OK);
+    }
 
     @DeleteMapping("/{id}")
     @Secured("ROLE_ADMIN")

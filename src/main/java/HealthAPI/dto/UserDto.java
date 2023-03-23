@@ -13,9 +13,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDto {
-
     private String firstName;
-
     private String lastName;
 
     @Column(nullable = false, unique = true)

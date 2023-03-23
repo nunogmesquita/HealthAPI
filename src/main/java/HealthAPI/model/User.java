@@ -42,7 +42,12 @@ public class User implements UserDetails{
     String password;
 
     @NotBlank(message = "Must have role")
+    @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private HealthCareSpecialty healthCareSpecialty;
 
     private boolean deleted = Boolean.FALSE;
 

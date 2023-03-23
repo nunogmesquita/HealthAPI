@@ -20,6 +20,8 @@ public interface UserService {
 
     UserDto updateUser(Long id, UserCreateDto userCreateDto);
 
+    UserDto updateMyAccount(Long id,UpdateUserDto updateUserDto);
+
     void deleteUser(Long userId);
 
 }
