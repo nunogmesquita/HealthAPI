@@ -11,9 +11,14 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
+    Optional<User> findById(Long id);
+
     Optional<User> findByEmail(String username);
 
-    User findByToken(String jwt);
+    User findByTokens(String jwt);
 
     List<User> findByRole(Role healthcareprovider);
+
+    List<User> findByDeletedFalse();
+
 }

@@ -1,9 +1,9 @@
 package HealthAPI.service;
 
 import HealthAPI.converter.UserConverter;
-import HealthAPI.dto.UpdateUserDto;
-import HealthAPI.dto.UserCreateDto;
-import HealthAPI.dto.UserDto;
+import HealthAPI.dto.User.UserCreateDto;
+import HealthAPI.dto.User.UserDto;
+import HealthAPI.model.Speciality;
 import HealthAPI.model.User;
 import HealthAPI.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +11,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static HealthAPI.model.Role.HEALTHCAREPROVIDER;
-
 @Service
-public class UserServiceImpl implements UserService{
-    private UserRepository userRepository;
-    private UserConverter userConverter;
+public class UserServiceImpl implements UserService {
+
+    private final UserRepository userRepository;
+    private final UserConverter userConverter;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, UserConverter userConverter) {
@@ -26,21 +25,15 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public List<UserDto> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        List<UserDto> userDtos = users.parallelStream()
+        List<User> users = userRepository.findByDeletedFalse();
+        return users.parallelStream()
                 .map(userConverter::fromUserToUserDto)
                 .toList();
-        return userDtos;
     }
 
-    @Override
-    public UserDto getUserById(Long userId) {
-        User user = userRepository.getReferenceById(userId);
+    public UserDto getUserByToken(String jwt) {
+        User user = userRepository.findByTokens(jwt);
         return userConverter.fromUserToUserDto(user);
-    }
-
-    public User getUserByToken(String jwt){
-        return userRepository.findByToken(jwt);
     }
 
     @Override
@@ -55,33 +48,35 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.getReferenceById(id);
         user.setFirstName(userCreateDto.getFirstName());
         user.setLastName(userCreateDto.getLastName());
-        user.setPassword(userCreateDto.getPassword());
-        user.setRole(userCreateDto.getRole());
         user.setEmail(userCreateDto.getEmail());
-        userRepository.save(user);
-        return userConverter.fromUserToUserDto(user);
-    }
-
-    @Override
-    public UserDto updateMyAccount(User user, UpdateUserDto updateUserDto) {
-        user.setFirstName(updateUserDto.getFirstName());
-        user.setLastName(updateUserDto.getLastName());
-        user.setEmail(updateUserDto.getEmail());
-        user.setPassword(updateUserDto.getPassword());
+        user.setPassword(userCreateDto.getPassword());
+        user.setSpeciality(userCreateDto.getSpeciality());
         userRepository.save(user);
         return userConverter.fromUserToUserDto(user);
     }
 
     @Override
     public void deleteUser(Long userId) {
-        userRepository.deleteById(userId);
+        User user = userRepository.findById(userId).orElseThrow();
+        user.markAsDeleted();
+        userRepository.save(user);
     }
 
     @Override
-    public List<User> getHealthCareProviders() {
-        List<User> hcp = userRepository.findByRole(HEALTHCAREPROVIDER);
-        hcp.forEach(user -> user.toString());
-        return hcp.stream().toList();
+    public String getAllServices() {
+        return Speciality.values().toString();
+        /*
+        List<User> users = userRepository.findByDeletedFalseAndRole();
+        return users.stream()
+                .map(user -> toString())
+                .toString();
+
+         */
+    }
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow();
     }
 
 }

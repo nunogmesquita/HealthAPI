@@ -2,7 +2,7 @@ package HealthAPI.controller;
 
 import HealthAPI.dto.AuthenticationRequest;
 import HealthAPI.dto.AuthenticationResponse;
-import HealthAPI.dto.ClientCreateDto;
+import HealthAPI.dto.Client.ClientCreateDto;
 import HealthAPI.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -1,61 +1,27 @@
 package HealthAPI.service;
 
-import HealthAPI.dto.TimeSlotBookingRequest;
-import HealthAPI.dto.TimeSlotResponse;
-import HealthAPI.dto.TimeSlotStatusRequest;
+import HealthAPI.dto.TimeSlot.WeeklyTimeSlotDto;
+import HealthAPI.dto.User.UserDto;
+import HealthAPI.model.Speciality;
 import HealthAPI.model.TimeSlot;
-import org.springframework.http.ResponseEntity;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 public interface TimeSlotService {
 
-    static boolean isSlotOverlap(List<LocalTime[]> timeSlots, TimeSlot timeSlot) {
+    void generateWeeklyTimeSlots(WeeklyTimeSlotDto weeklyTimeSlotDto, UserDto userDto);
 
-        timeSlots.add(new LocalTime[]{
-                getLocalTimeFromDate(timeSlot.getStartTime()),
-                getLocalTimeFromDate(timeSlot.getEndTime())
-        });
+    List<TimeSlot> getAvailableTimeSlots(int page, int i);
 
-        timeSlots.sort(Comparator.comparing(time -> time[0]));
+    List<TimeSlot> getAvailableTimeSlotsByUser(Long userId, int page, int i);
 
-        for (int i = 1; i < timeSlots.size(); i++) {
-            if (timeSlots.get(i - 1)[1].compareTo(timeSlots.get(i)[0]) > 0)
-                return true;
-        }
-        return false;
-    }
+    List<TimeSlot> getAvailableTimeSlotsBySpeciality(Speciality speciality, int page, int i);
 
-    static LocalTime getLocalTimeFromDate(Date date) {
-        return date
-                .toInstant()
-                .atZone(ZoneId.of("UTC"))
-                .toLocalTime();
-    }
+    void deleteAllTimeSlotsByUser(Long userId);
 
-    static LocalDate getLocalDate(Date date) {
-        return date
-                .toInstant()
-                .atZone(ZoneId.of("UTC"))
-                .toLocalDate();
-    }
+    void deleteTimeSlot(Long id);
 
-    ResponseEntity<?> createTimeSlot(TimeSlot timeSlot);
+    void updateTimeSlot(Long id, TimeSlot updatedTimeSlot);
 
-    List<TimeSlot> getAll();
-
-    List<TimeSlot> getAllByHcpId(Long hcp);
-
-    ResponseEntity<?> bookTimeSlot(TimeSlotBookingRequest timeSlotRequest);
-
-    TimeSlot getAppointmentTimeSlotById(Long hcpId, Long timeSlotId);
-
-    TimeSlotResponse getLiveTimeSlotStatus(TimeSlotStatusRequest timeSlotStatusRequest);
-
-    TimeSlot deleteTimeSlotById(Long slotId);
+    TimeSlot getTimeSlotById(Long id);
 }

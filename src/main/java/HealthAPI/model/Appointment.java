@@ -5,34 +5,27 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
-
 @Entity
 @Builder
 @Getter
 @Setter
-@Table(name = "appointments")
 public class Appointment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    Date appointmentDate;
-
-    @Column(nullable = false)
-    AppointmentType appointmentType;
-
     @OneToOne
-    Long timeSlotId;
+    private User user;
 
-    @OneToMany
-    Long clientId;
+    @ManyToOne
+    TimeSlot timeSlot;
 
-    @OneToMany
-    Long hcpId;
+    @ManyToOne
+    Client client;
 
     @Column
     @Enumerated(EnumType.STRING)
     Status STATUS;
+
 }

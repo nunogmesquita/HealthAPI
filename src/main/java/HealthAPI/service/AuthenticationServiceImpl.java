@@ -3,20 +3,22 @@ package HealthAPI.service;
 import HealthAPI.converter.ClientConverter;
 import HealthAPI.dto.AuthenticationRequest;
 import HealthAPI.dto.AuthenticationResponse;
-import HealthAPI.dto.ClientCreateDto;
+import HealthAPI.dto.Client.ClientCreateDto;
 import HealthAPI.model.*;
 import HealthAPI.repository.ClientRepository;
 import HealthAPI.repository.TokenRepository;
 import HealthAPI.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
     private final ClientRepository clientRepository;
@@ -25,28 +27,27 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationResponse register(ClientCreateDto request) {
-        Client client = clientConverter.fromClientCreateDtoToClient(request);
-        clientRepository.save(client);
-        String jwtToken = jwtService.generateToken(client);
-        saveClientToken(client, jwtToken);
-        return AuthenticationResponse.builder()
-                .token(jwtToken)
-                .build();
+    @Autowired
+    public AuthenticationServiceImpl(UserRepository userRepository, ClientRepository clientRepository,
+                                     TokenRepository tokenRepository, ClientConverter clientConverter,
+                                     JwtService jwtService, AuthenticationManager authenticationManager) {
+        this.userRepository = userRepository;
+        this.clientRepository = clientRepository;
+        this.tokenRepository = tokenRepository;
+        this.clientConverter = clientConverter;
+        this.jwtService = jwtService;
+        this.authenticationManager = authenticationManager;
     }
 
-    @Override
-    public AuthenticationResponse authenticateUser(AuthenticationRequest request) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow();
-        String jwtToken = jwtService.generateToken(user);
-        revokeAllUserTokens(user);
-        saveUserToken(user, jwtToken);
+    public AuthenticationResponse register(ClientCreateDto request) {
+        if (Period.between(request.getBirthDate(), LocalDate.now()).getYears() < 18) {
+            ResponseEntity.badRequest().body("You must have at least 18 years old.");
+            return null;
+        }
+        Client client = clientConverter.fromClientCreateDtoToClient(request);
+        clientRepository.save(client);
+        String jwtToken = jwtService.generateToken(client, client.getId());
+        saveClientToken(client, jwtToken);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
@@ -60,12 +61,24 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         );
         Client client = clientRepository.findByEmail(request.getEmail())
                 .orElseThrow();
-        String jwtToken = jwtService.generateToken(client);
+        String jwtToken = jwtService.generateToken(client, client.getId());
         revokeAllClientTokens(client);
         saveClientToken(client, jwtToken);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
+    }
+
+    public void revokeAllClientTokens(Client client) {
+        List<Token> validUserTokens = tokenRepository.findAllValidTokenByClient(client.getId());
+        if (validUserTokens.isEmpty()) {
+            return;
+        }
+        validUserTokens.forEach(token -> {
+            token.setExpired(true);
+            token.setRevoked(true);
+        });
+        tokenRepository.saveAll(validUserTokens);
     }
 
     @Override
@@ -78,6 +91,23 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .revoked(false)
                 .build();
         tokenRepository.save(clientToken);
+    }
+
+    @Override
+    public AuthenticationResponse authenticateUser(AuthenticationRequest request) {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow();
+        String jwtToken = jwtService.generateToken(user, user.getId());
+        revokeAllUserTokens(user);
+        saveUserToken(user, jwtToken);
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .build();
     }
 
     @Override
@@ -94,18 +124,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public void revokeAllUserTokens(User user) {
         List<Token> validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
-        if (validUserTokens.isEmpty()) {
-            return;
-        }
-        validUserTokens.forEach(token -> {
-            token.setExpired(true);
-            token.setRevoked(true);
-        });
-        tokenRepository.saveAll(validUserTokens);
-    }
-
-    public void revokeAllClientTokens(Client client) {
-        List<Token> validUserTokens = tokenRepository.findAllValidTokenByClient(client.getId());
         if (validUserTokens.isEmpty()) {
             return;
         }

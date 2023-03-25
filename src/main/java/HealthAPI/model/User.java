@@ -1,7 +1,6 @@
 package HealthAPI.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
@@ -10,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,9 +17,6 @@ import java.util.Collection;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "users")
-@SQLDelete(sql = "UPDATE users SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
 public class User implements UserDetails{
 
     @Id
@@ -40,25 +37,24 @@ public class User implements UserDetails{
     @Pattern(regexp = "^(?=.*\\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\\w\\d\\s:])([^\\s]){8,16}$", message = "Password must contain at least 1 number (0-9),  1 uppercase letter,  1 lowercase letter, 1 non-alpha numeric number and have 8-16 characters with no space")
     String password;
 
-    @NotBlank(message = "Must have role")
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Speciality speciality;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private HealthCareSpecialty healthCareSpecialty;
+    private Role role = Role.HEALTHCAREPROVIDER;
 
-    private boolean deleted = Boolean.FALSE;
+    @OneToMany
+    private List<Appointment> appointments;
 
-    @Override
-    public String toString() {
-        return "HealthCareProvider{" +
-                "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", healthCareSpecialty=" + healthCareSpecialty +
-                '}';
-    }
+    @OneToMany
+    private List<TimeSlot> timeSlots;
+
+    @OneToMany
+    private List <Token> tokens;
+
+    private boolean deleted;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -67,7 +63,7 @@ public class User implements UserDetails{
 
     @Override
     public String getUsername() {
-        return null;
+        return email;
     }
 
     @Override
@@ -89,4 +85,18 @@ public class User implements UserDetails{
     public boolean isEnabled() {
         return false;
     }
+
+    public void markAsDeleted() {
+        this.deleted = true;
+    }
+
+    @Override
+    public String toString() {
+        return "Healthcare Provider{" +
+                "firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", speciality=" + speciality +
+                '}';
+    }
+
 }

@@ -1,7 +1,9 @@
 package HealthAPI.controller;
 
 import HealthAPI.converter.UserConverter;
-import HealthAPI.dto.*;
+import HealthAPI.dto.User.UserCreateDto;
+import HealthAPI.dto.User.UserDto;
+import HealthAPI.messages.Responses;
 import HealthAPI.model.User;
 import HealthAPI.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,14 +18,13 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
 
-    private UserService userService;
-    private UserConverter userConverter;
+    private final UserService userService;
+    private final UserConverter userConverter;
 
     @Autowired
     public UserController(UserService userService, UserConverter userConverter) {
@@ -32,24 +33,24 @@ public class UserController {
     }
 
     @GetMapping("/all")
-    @Secured({"ROLE_ADMIN", "ROLE_COLLABORATOR"})
+    @Secured("ROLE_ADMIN")
     public ResponseEntity<List<UserDto>> getAllUsers() {
         List<UserDto> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    @Secured({"ROLE_ADMIN", "ROLE_COLLABORATOR"})
+    @Secured({"ROLE_ADMIN"})
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
-        UserDto user = userService.getUserById(id);
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        User user = userService.getUserById(id);
+        UserDto userDto = userConverter.fromUserToUserDto(user);
+        return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
 
     @GetMapping("/myAccount")
     public ResponseEntity<UserDto> getMyAccount(@NonNull HttpServletRequest request) {
         String jwt = request.getHeader("Authorization").substring(7);
-        User user = userService.getUserByToken(jwt);
-        UserDto userDto= userConverter.fromUserToUserDto(user);
+        UserDto userDto = userService.getUserByToken(jwt);
         return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
 
@@ -61,9 +62,8 @@ public class UserController {
             for (FieldError error : errors) {
                 System.out.println(error.getObjectName() + " - " + error.getDefaultMessage());
             }
-            return new ResponseEntity<>(HttpStatus.CREATED);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
         UserCreateDto savedUser = userService.createUser(user);
         return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
@@ -76,8 +76,8 @@ public class UserController {
     }
 
     @PatchMapping("/myAccount")
-    @Secured({"ROLE_ADMIN", "ROLE_COLLABORATOR", "ROLE_HEALTHCAREPROVIDERS"})
-    public ResponseEntity<UserDto> updateMyAccount(@NonNull HttpServletRequest request, @Valid @RequestBody UpdateUserDto updateUserDto, BindingResult bindingResult) {
+    @Secured({"ROLE_ADMIN", "ROLE_HEALTHCAREPROVIDERS"})
+    public ResponseEntity<UserDto> updateMyAccount(@NonNull HttpServletRequest request, @Valid @RequestBody UserCreateDto userCreateDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
 
             List<FieldError> errors = bindingResult.getFieldErrors();
@@ -86,8 +86,8 @@ public class UserController {
             }
         }
         String jwt = request.getHeader("Authorization").substring(7);
-        User user = userService.getUserByToken(jwt);
-        UserDto updatedUser = userService.updateMyAccount(user, updateUserDto);
+        UserDto user = userService.getUserByToken(jwt);
+        UserDto updatedUser = userService.updateUser(user.getId(), userCreateDto);
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
@@ -95,7 +95,7 @@ public class UserController {
     @Secured("ROLE_ADMIN")
     public ResponseEntity<String> deleteAccount(@PathVariable Long id) {
         userService.deleteUser(id);
-        return new ResponseEntity<>("User has been deleted, mdf!", HttpStatus.OK);
+        return new ResponseEntity<>(Responses.DELETED_USER.formatted(id), HttpStatus.OK);
     }
-}
 
+}

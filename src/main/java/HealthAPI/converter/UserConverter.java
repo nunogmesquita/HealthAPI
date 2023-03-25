@@ -1,8 +1,7 @@
 package HealthAPI.converter;
 
-import HealthAPI.dto.UpdateUserDto;
-import HealthAPI.dto.UserCreateDto;
-import HealthAPI.dto.UserDto;
+import HealthAPI.dto.User.UserCreateDto;
+import HealthAPI.dto.User.UserDto;
 import HealthAPI.model.User;
 import org.mapstruct.Mapper;
 
@@ -16,9 +15,5 @@ public interface UserConverter {
     UserDto fromUserToUserDto(User user);
 
     User fromUserDtoToUser(UserDto userDto);
-
-    UpdateUserDto fromUserToUpdateUserDto(User user);
-
-    User fromUpdateUserDtoToUser(UpdateUserDto updateUserDto);
 
 }

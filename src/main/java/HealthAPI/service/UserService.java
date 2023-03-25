@@ -1,9 +1,8 @@
 package HealthAPI.service;
 
 
-import HealthAPI.dto.UpdateUserDto;
-import HealthAPI.dto.UserCreateDto;
-import HealthAPI.dto.UserDto;
+import HealthAPI.dto.User.UserCreateDto;
+import HealthAPI.dto.User.UserDto;
 import HealthAPI.model.User;
 import jakarta.validation.Valid;
 
@@ -13,17 +12,15 @@ public interface UserService {
 
     List<UserDto> getAllUsers();
 
-    UserDto getUserById(Long userId);
+    User getUserById(Long userId);
 
-    User getUserByToken(String jwt);
+    UserDto getUserByToken(String jwt);
 
     UserCreateDto createUser(@Valid UserCreateDto user);
 
     UserDto updateUser(Long id, UserCreateDto userCreateDto);
 
-    UserDto updateMyAccount(User user, UpdateUserDto updateUserDto);
-
     void deleteUser(Long userId);
 
-    List<User> getHealthCareProviders();
+    String getAllServices();
 }

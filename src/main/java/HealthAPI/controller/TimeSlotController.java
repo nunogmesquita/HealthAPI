@@ -1,88 +1,73 @@
 package HealthAPI.controller;
 
-import HealthAPI.dto.BaseResponse;
-import HealthAPI.dto.TimeSlotBookingRequest;
-import HealthAPI.dto.TimeSlotResponse;
-import HealthAPI.dto.TimeSlotStatusRequest;
-import HealthAPI.model.Appointment;
+import HealthAPI.dto.TimeSlot.WeeklyTimeSlotDto;
+import HealthAPI.dto.User.UserDto;
+import HealthAPI.messages.Responses;
+import HealthAPI.model.Speciality;
 import HealthAPI.model.TimeSlot;
 import HealthAPI.service.TimeSlotService;
-import jakarta.validation.Valid;
-import org.springframework.format.annotation.DateTimeFormat;
+import HealthAPI.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.List;
 
 @RestController
 @RequestMapping("/slots")
 public class TimeSlotController {
 
-  private TimeSlotService timeSlotService;
+    private final TimeSlotService timeSlotService;
+    private final UserService userService;
 
-  public TimeSlotController(TimeSlotService timeSlotService) {
-    this.timeSlotService = timeSlotService;
-  }
-
-  @PutMapping("/create")
-  public BaseResponse<TimeSlot> createNewTimeSlot(@Valid @RequestBody TimeSlot timeSlot) {
-    ResponseEntity<?> response = timeSlotService.createTimeSlot(timeSlot);
-    if (response.getStatusCode().is2xxSuccessful()) {
-      return new BaseResponse<>((TimeSlot) response.getBody(),
-              response.getStatusCode().toString());
-    } else if (response.getStatusCode().is4xxClientError() && response.getBody() != null) {
-      return new BaseResponse<>(null, response.getBody().toString());
-    } else {
-      return new BaseResponse<>(null, response.getStatusCode().toString());
+    @Autowired
+    public TimeSlotController(TimeSlotService timeSlotService, UserService userService) {
+        this.timeSlotService = timeSlotService;
+        this.userService = userService;
     }
-  }
 
-  @GetMapping("/getAllByHcpId")
-  public TimeSlotResponse getAllTimeSlotByHcpId(@Valid @RequestParam Long hcpId) {
-    List<TimeSlot> slots = timeSlotService.getAllByHcpId(hcpId);
-    if (slots == null || slots.size() == 0) {
-      return new TimeSlotResponse(null, "NOT FOUND");
-    } else {
-      return new TimeSlotResponse(slots, "FOUND");
+    @PostMapping("/create")
+    public ResponseEntity<String> generateWeeklyTimeSlots(@NonNull HttpServletRequest request,
+                                                          @RequestBody WeeklyTimeSlotDto weeklyTimeSlotDto) {
+        String jwt = request.getHeader("Authorization").substring(7);
+        UserDto userDto = userService.getUserByToken(jwt);
+        timeSlotService.generateWeeklyTimeSlots(weeklyTimeSlotDto, userDto);
+        return new ResponseEntity<>(Responses.TIMESLOTS_CREATED, HttpStatus.OK);
     }
-  }
 
-  @GetMapping("/liveSlotStatus")
-  public TimeSlotResponse getTimeSlotLiveStatus(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date date,
-                                        @RequestParam Long hcpId,
-                                        @RequestParam Long clientId) {
-
-    TimeSlotStatusRequest timeSlotStatusRequest = new TimeSlotStatusRequest(hcpId, clientId, date);
-    return timeSlotService.getLiveTimeSlotStatus(timeSlotStatusRequest);
-  }
-
-  @GetMapping("/getAll")
-  public TimeSlotResponse getAllTimeSlot() {
-    List<TimeSlot> timeSlotList = timeSlotService.getAll();
-    return new TimeSlotResponse(timeSlotList, "DONE");
-  }
-
-  @PatchMapping("/book")
-  public BaseResponse<Appointment> bookTimeSlotByClientId(@Valid @RequestBody TimeSlotBookingRequest timeSlotRequest) {
-
-    ResponseEntity<?> response = timeSlotService.bookTimeSlot(timeSlotRequest);
-    if (response.getStatusCode().is2xxSuccessful()) {
-      return new BaseResponse<>((Appointment) response.getBody(),
-          response.getStatusCode().toString());
-    } else {
-      return new BaseResponse<>(null, response.getStatusCode().toString());
+    @GetMapping("/available")
+    public List<TimeSlot> getAvailableTimeSlots(@RequestParam(defaultValue = "0") int page) {
+        return timeSlotService.getAvailableTimeSlots(page, page + 10);
     }
-  }
 
-  @DeleteMapping("/deleteById")
-  public BaseResponse<TimeSlot> deleteTimeSlotById(@RequestParam Long timeSlotId) {
-
-    TimeSlot deletedTimeSlot = timeSlotService.deleteTimeSlotById(timeSlotId);
-    if (deletedTimeSlot == null) {
-      return new BaseResponse<>(null, "Bad Request");
-    } else {
-      return new BaseResponse<>(deletedTimeSlot, "OK");
+    @GetMapping("/available/{userId}")
+    public List<TimeSlot> getAvailableTimeSlotsByUser(@PathVariable Long userId,
+                                                      @RequestParam(defaultValue = "0") int page) {
+        return timeSlotService.getAvailableTimeSlotsByUser(userId, page, page + 10);
     }
-  }
+
+    @GetMapping("/available/speciality/{speciality}")
+    public List<TimeSlot> getAvailableTimeSlotsBySpeciality(@PathVariable Speciality speciality,
+                                                            @RequestParam(defaultValue = "0") int page) {
+        return timeSlotService.getAvailableTimeSlotsBySpeciality(speciality, page, page + 10);
+    }
+
+    @DeleteMapping("/byUser/{userId}")
+    public void deleteAllTimeSlotsByUser(@PathVariable Long userId) {
+        timeSlotService.deleteAllTimeSlotsByUser(userId);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteTimeSlot(@PathVariable Long id) {
+        timeSlotService.deleteTimeSlot(id);
+    }
+
+    @PutMapping("/{id}")
+    public void updateTimeSlot(@PathVariable Long id, @RequestBody TimeSlot updatedTimeSlot) {
+        timeSlotService.updateTimeSlot(id, updatedTimeSlot);
+    }
+
 }

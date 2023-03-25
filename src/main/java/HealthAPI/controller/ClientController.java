@@ -1,13 +1,9 @@
 package HealthAPI.controller;
 
-import HealthAPI.converter.ClientConverter;
-import HealthAPI.converter.UserConverter;
-import HealthAPI.dto.*;
-import HealthAPI.model.Client;
-import HealthAPI.model.User;
-import HealthAPI.service.AuthenticationService;
+import HealthAPI.dto.Client.ClientCreateDto;
+import HealthAPI.dto.Client.ClientDto;
+import HealthAPI.messages.Responses;
 import HealthAPI.service.ClientService;
-import HealthAPI.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,36 +20,30 @@ import java.util.List;
 @RestController
 @RequestMapping("")
 public class ClientController {
-    private AuthenticationService authenticationService;
-    private UserConverter userConverter;
-    private ClientService clientService;
-    private UserService userService;
-    private ClientConverter clientConverter;
+
+    private final ClientService clientService;
 
     @Autowired
-    public ClientController(AuthenticationService authenticationService, UserConverter userConverter) {
-        this.authenticationService = authenticationService;
-        this.userConverter = userConverter;
+    public ClientController(ClientService clientService) {
+        this.clientService = clientService;
     }
 
     @GetMapping("/myaccount")
-    @Secured("ROLE_CLIENT")
     public ResponseEntity<ClientDto> viewMyAccount(@NonNull HttpServletRequest header) {
         String jwt = header.getHeader("Authorization").substring(7);
-        Client client = clientService.getClientByToken(jwt);
-        ClientDto clientDto = clientConverter.fromClientToClientDto(client);
+        ClientDto clientDto = clientService.getClientByToken(jwt);
         return new ResponseEntity<>(clientDto, HttpStatus.OK);
     }
 
     @GetMapping("/getAll")
-    public ResponseEntity<List<User>> getAvailableDoctors() {
-        List<User> hcproviders = userService.getHealthCareProviders();
-        return new ResponseEntity<>(hcproviders, HttpStatus.OK);
+    public ResponseEntity<List<ClientDto>> getAllClients() {
+        List<ClientDto> clients = clientService.getAllClients();
+        return new ResponseEntity<>(clients, HttpStatus.OK);
     }
 
     @PatchMapping("/myAccount")
-    @Secured({"ROLE_ADMIN", "ROLE_COLLABORATOR", "ROLE_HEALTHCAREPROVIDERS"})
-    public ResponseEntity<ClientDto> updateMyAccount(@NonNull HttpServletRequest request, @Valid @RequestBody ClientDto clientDto, BindingResult bindingResult) {
+    @Secured("Client.Class")
+    public ResponseEntity<ClientDto> updateMyAccount(@NonNull HttpServletRequest request, @Valid @RequestBody ClientCreateDto clientCreateDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
 
             List<FieldError> errors = bindingResult.getFieldErrors();
@@ -62,15 +52,15 @@ public class ClientController {
             }
         }
         String jwt = request.getHeader("Authorization").substring(7);
-        Client client = clientService.getClientByToken(jwt);
-        ClientDto clientUpdated = clientService.updateMyAccount(client, clientDto);
-        return new ResponseEntity<>(clientUpdated, HttpStatus.OK);
+        ClientDto client = clientService.getClientByToken(jwt);
+        ClientDto updatedClient = clientService.updateClient(client.getId(), clientCreateDto);
+        return new ResponseEntity<>(updatedClient, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteAccount(@PathVariable Long id) {
         clientService.deleteClient(id);
-        return new ResponseEntity<>("Client has been deleted, mdf!", HttpStatus.OK);
+        return new ResponseEntity<>(Responses.DELETED_CLIENT.formatted(id), HttpStatus.OK);
     }
 
 }

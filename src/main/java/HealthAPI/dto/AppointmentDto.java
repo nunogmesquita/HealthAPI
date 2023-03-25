@@ -1,8 +1,5 @@
 package HealthAPI.dto;
 
-import HealthAPI.model.HealthCareSpecialty;
-import HealthAPI.model.AppointmentType;
-import HealthAPI.model.Client;
 import HealthAPI.model.TimeSlot;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -20,8 +17,5 @@ public class AppointmentDto {
     TimeSlot timeSlot;
     @NotNull(message = "Must have a client associated.")
     private Long clientId;
-    @NotNull(message = "Choose your type for appointment")
-    @Enumerated(EnumType.STRING)
-    AppointmentType appointmentType;
 
 }

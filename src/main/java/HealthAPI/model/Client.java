@@ -9,17 +9,15 @@ import org.hibernate.annotations.Where;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 
 @Getter
 @Setter
 @Builder
 @ToString
 @Entity
-@Table(name = "clients")
-@SQLDelete(sql = "UPDATE clients SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
 public class Client implements UserDetails {
 
     @Id
@@ -27,10 +25,7 @@ public class Client implements UserDetails {
     private Long id;
 
     @Column(nullable = false)
-    String name;
-
-    @Column(nullable = false)
-    String userName;
+    String fullName;
 
     @Column(nullable = false)
     @Pattern(regexp = "/^([9][1236])[0-9]*$/", message = "Please insert a valid phone number.")
@@ -41,7 +36,9 @@ public class Client implements UserDetails {
     String email;
 
     @Column(nullable = false)
-    @Pattern(regexp = "^(?=.*\\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\\w\\d\\s:])([^\\s]){8,16}$", message = "Password must contain at least 1 number (0-9),  1 uppercase letter,  1 lowercase letter, 1 non-alpha numeric number and have 8-16 characters with no space")
+    @Pattern(regexp = "^(?=.*\\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\\w\\d\\s:])([^\\s]){8,16}$",
+            message = "Password must contain at least 1 number (0-9),  1 uppercase letter,  1 lowercase letter, " +
+                    "1 non-alpha numeric number and have 8-16 characters with no space")
     String password;
 
     @Column(nullable = false)
@@ -49,20 +46,27 @@ public class Client implements UserDetails {
             + "|^(((19|2[0-9])[0-9]{2})-02-(0[1-9]|1[0-9]|2[0-8]))$"
             + "|^(((19|2[0-9])[0-9]{2})-(0[13578]|10|12)-(0[1-9]|[12][0-9]|3[01]))$"
             + "|^(((19|2[0-9])[0-9]{2})-(0[469]|11)-(0[1-9]|[12][0-9]|30))$", message = "Invalid date.")
-    private SimpleDateFormat birthDate;
+    private LocalDate birthDate;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column(nullable = false, unique = true)
-    @Pattern(regexp = "^(?:9[1-36][0-9]|2[12][0-9]|23[1-689]|24[1-59]|25[1-9]|26[1-35689]|27[1-9]|28[1-69]|29[1256]|30[0-9])[0-9]{6}$", message = "Invalid NIF.")
+    @Column(unique = true)
+    @Pattern(regexp = "^(?:9[1-36][0-9]|2[12][0-9]|23[1-689]|24[1-59]|25[1-9]|26[1-35689]|27[1-9]|28[1-69]|29[1256]|30[0-9])[0-9]{6}$",
+            message = "Invalid NIF.")
     private int NIF;
 
-    @Column(nullable = false)
+    @OneToOne
     private Address address;
 
-    private boolean deleted = Boolean.FALSE;
+    @OneToMany
+    private List<Appointment> appointments;
+
+    @OneToMany
+    private List <Token> tokens;
+
+    private boolean deleted;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -71,7 +75,7 @@ public class Client implements UserDetails {
 
     @Override
     public String getUsername() {
-        return null;
+        return email;
     }
 
     @Override
@@ -93,4 +97,9 @@ public class Client implements UserDetails {
     public boolean isEnabled() {
         return false;
     }
+
+    public void markAsDeleted() {
+        this.deleted = true;
+    }
+
 }

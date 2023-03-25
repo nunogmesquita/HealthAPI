@@ -1,7 +1,7 @@
 package HealthAPI.converter;
 
-import HealthAPI.dto.ClientCreateDto;
-import HealthAPI.dto.ClientDto;
+import HealthAPI.dto.Client.ClientCreateDto;
+import HealthAPI.dto.Client.ClientDto;
 import HealthAPI.model.Client;
 import org.mapstruct.Mapper;
 

@@ -1,20 +1,20 @@
 package HealthAPI.service;
 
 import HealthAPI.converter.ClientConverter;
-import HealthAPI.converter.UserConverter;
-import HealthAPI.dto.ClientDto;
+import HealthAPI.dto.Client.ClientCreateDto;
+import HealthAPI.dto.Client.ClientDto;
 import HealthAPI.model.Client;
-import HealthAPI.model.User;
 import HealthAPI.repository.ClientRepository;
-import HealthAPI.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ClientServiceImpl implements ClientService {
 
-    private ClientRepository clientRepository;
-    private ClientConverter clientConverter;
+    private final ClientRepository clientRepository;
+    private final ClientConverter clientConverter;
 
     @Autowired
     public ClientServiceImpl(ClientRepository clientRepository, ClientConverter clientConverter) {
@@ -23,21 +23,44 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public Client getClientByToken(String jwt) {
-        return clientRepository.findByToken(jwt);
+    public ClientDto getClientByToken(String jwt) {
+        Client client = clientRepository.findByTokens(jwt);
+        return clientConverter.fromClientToClientDto(client);
     }
 
     @Override
     public void deleteClient(Long clientId) {
-        clientRepository.deleteById(clientId);
+        Client client = clientRepository.findById(clientId).orElseThrow();
+        client.markAsDeleted();
+        clientRepository.save(client);
     }
 
     @Override
-    public ClientDto updateMyAccount(Client client, ClientDto clientDto) {
-        client.setName(clientDto.getName());
-        client.setUserName(clientDto.getUserName());
-        client.setEmail(clientDto.getEmail());
+    public List<ClientDto> getAllClients() {
+        List<Client> clients = clientRepository.findByDeletedFalse();
+        return clients.parallelStream()
+                .map(clientConverter::fromClientToClientDto)
+                .toList();
+    }
+
+    @Override
+    public ClientDto updateClient(Long id, ClientCreateDto clientCreateDto) {
+        Client client = clientRepository.getReferenceById(id);
+        client.setFullName(clientCreateDto.getFullName());
+        client.setPhoneNumber(clientCreateDto.getPhoneNumber());
+        client.setEmail(clientCreateDto.getEmail());
+        client.setPassword(clientCreateDto.getPassword());
+        client.setBirthDate(clientCreateDto.getBirthDate());
+        client.setGender(clientCreateDto.getGender());
+        client.setNIF(clientCreateDto.getNIF());
+        client.setAddress(clientCreateDto.getAddress());
         clientRepository.save(client);
         return clientConverter.fromClientToClientDto(client);
     }
+
+    public Client getClientById(Long id) {
+        return clientRepository.findById(id)
+                .orElseThrow();
+    }
+
 }

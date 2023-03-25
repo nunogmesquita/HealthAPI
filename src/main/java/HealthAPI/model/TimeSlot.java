@@ -1,17 +1,18 @@
 package HealthAPI.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "slots")
 @Entity
 public class TimeSlot {
 
@@ -19,14 +20,26 @@ public class TimeSlot {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id;
 
-    @NotNull
-    private Date startTime; // 24hr format.
+    @Column(nullable = false)
+    private LocalDateTime startTime;
 
-    @NotNull
-    private Date endTime;
+    @Column(name = "end_time")
+    private LocalDateTime endTime;
 
-    @NotNull
-    private Long hcpId;
+    @Column(nullable = false)
+    private DayOfWeek dayOfWeek;
+
+    @Column(nullable = false)
+    private int month;
+
+    @Column(nullable = false)
+    private int year;
+
+    @ManyToOne
+    private User user;
+
+    @OneToOne
+    private Appointment appointment;
 
     private boolean isBooked;
 

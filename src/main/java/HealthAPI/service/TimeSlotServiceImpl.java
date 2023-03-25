@@ -1,164 +1,125 @@
 package HealthAPI.service;
 
-import HealthAPI.dto.TimeSlotBookingRequest;
-import HealthAPI.dto.TimeSlotResponse;
-import HealthAPI.dto.TimeSlotStatusRequest;
-import HealthAPI.model.Appointment;
-import HealthAPI.model.TimeSlot;
+import HealthAPI.converter.TimeSlotConverter;
+import HealthAPI.converter.UserConverter;
+import HealthAPI.dto.TimeSlot.WeeklyTimeSlotDto;
+import HealthAPI.dto.User.UserDto;
+import HealthAPI.exceptions.ResourceNotFoundException;
+import HealthAPI.model.*;
 import HealthAPI.repository.TimeSlotRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
 @Service
 public class TimeSlotServiceImpl implements TimeSlotService {
 
-    public static final long MIN_SLOT_DURATION = 900000;
-    public static final long MAX_SLOT_DURATION = 1800000;
-
-    private static final TimeZone UTC_TIME_ZONE = TimeZone.getTimeZone("UTC");
-
-    private static final SimpleDateFormat SIMPLE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd-hh.mm.ss");
-
+    private final TimeSlotRepository timeSlotRepository;
+    private final AppointmentService appointmentService;
+    private final UserConverter userConverter;
+    private final TimeSlotConverter timeSlotConverter;
 
     @Autowired
-    private final ObjectMapper mapper = new ObjectMapper()
-            .configure(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS, true);
+    public TimeSlotServiceImpl(TimeSlotRepository timeSlotRepository, AppointmentService appointmentService,
+                               UserConverter userConverter, TimeSlotConverter timeSlotConverter) {
+        this.timeSlotRepository = timeSlotRepository;
+        this.appointmentService = appointmentService;
+        this.userConverter = userConverter;
+        this.timeSlotConverter = timeSlotConverter;
+    }
 
-    @Autowired
-    private TimeSlotRepository timeSlotRepository;
-
-    @Autowired
-    private AppointmentService appointmentService;
-
-    public ResponseEntity<?> createTimeSlot(TimeSlot timeSlot) {
-
-        if (timeSlot.getStartTime().compareTo(timeSlot.getEndTime()) >= 0) {
-            return ResponseEntity.badRequest().body("End Time must be greater than Start time");
+    @Override
+    public void generateWeeklyTimeSlots(WeeklyTimeSlotDto weeklyTimeSlotDto, UserDto userDto) {
+        LocalDateTime startDateTime = LocalDateTime.of(weeklyTimeSlotDto.getDate(), LocalTime.MIN);
+        LocalDateTime endDateTime = LocalDateTime.of(weeklyTimeSlotDto.getDate(), LocalTime.MAX);
+        List<LocalTimeRange> excludedRanges = new ArrayList<>();
+        if (weeklyTimeSlotDto.getExcludedTimeRanges() != null) {
+            for (String range : weeklyTimeSlotDto.getExcludedTimeRanges()) {
+                LocalTimeRange timeRange = LocalTimeRange.parse(range);
+                excludedRanges.add(timeRange);
+            }
         }
-
-        long slotDuration = (timeSlot.getEndTime().getTime() - timeSlot.getStartTime().getTime());
-
-        if (slotDuration < MIN_SLOT_DURATION || slotDuration > MAX_SLOT_DURATION) {
-            return ResponseEntity.badRequest().body("Time duration must lies between 15 to 30 min");
+        List<TimeSlot> timeSlots = new ArrayList<>();
+        for (DayOfWeek dayOfWeek : weeklyTimeSlotDto.getDayOfWeeks()) {
+            LocalDate currentDate = startDateTime.toLocalDate().with(TemporalAdjusters.nextOrSame(dayOfWeek));
+            while (currentDate.isBefore(endDateTime.toLocalDate())) {
+                LocalDateTime currentDateTime = LocalDateTime.of(currentDate, weeklyTimeSlotDto.getInitialHour());
+                while (currentDateTime.plus(Duration.ofHours(1)).isBefore(LocalDateTime.of(currentDate, weeklyTimeSlotDto.getFinishingHour()))) {
+                    boolean excluded = false;
+                    for (LocalTimeRange range : excludedRanges) {
+                        if (range.contains(currentDateTime.toLocalTime())) {
+                            excluded = true;
+                            break;
+                        }
+                    }
+                    if (!excluded) {
+                        timeSlots.add(TimeSlot.builder()
+                                .startTime(currentDateTime)
+                                .endTime(currentDateTime.plus(Duration.ofHours(1)))
+                                .dayOfWeek(dayOfWeek)
+                                .month(currentDate.getMonthValue())
+                                .year(currentDate.getYear())
+                                .user(userConverter.fromUserDtoToUser(userDto))
+                                .build());
+                    }
+                    currentDateTime = currentDateTime.plus(Duration.ofHours(1));
+                }
+                currentDate = currentDate.plusWeeks(1);
+            }
         }
-
-        Long currentHcpId = timeSlot.getHcpId();
-        List<TimeSlot> allTimeSlotOfGivenHcp = timeSlotRepository.getAllByHcpId(currentHcpId);
-
-        List<LocalTime[]> timeSlots = new ArrayList<>();
-
-        for (TimeSlot currentTimeSlot : allTimeSlotOfGivenHcp) {
-            LocalTime localStartTime = TimeSlotService.getLocalTimeFromDate(currentTimeSlot.getStartTime());
-            LocalTime localEndTime = TimeSlotService.getLocalTimeFromDate(currentTimeSlot.getEndTime());
-            timeSlots.add(new LocalTime[]{localStartTime, localEndTime});
-        }
-
-        if (TimeSlotService.isSlotOverlap(timeSlots, timeSlot)) {
-            return ResponseEntity.badRequest().body("Error, Overlapping TimeSlot!");
-        } else {
+        for (TimeSlot timeSlot : timeSlots) {
             timeSlotRepository.save(timeSlot);
-            return ResponseEntity.ok().body(timeSlot);
         }
     }
 
-    public List<TimeSlot> getAll() {
-        return timeSlotRepository.findAll();
+    public List<TimeSlot> getAvailableTimeSlots(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return timeSlotRepository.findByIsBookedFalse(pageable).getContent();
     }
 
-    public List<TimeSlot> getAllByHcpId(Long hcp) {
-        return timeSlotRepository.getAllByHcpId(hcp);
+    public List<TimeSlot> getAvailableTimeSlotsByUser(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return timeSlotRepository.findByUserAndIsBookedFalse(userId, pageable).getContent();
     }
 
-    public ResponseEntity<?> bookTimeSlot(TimeSlotBookingRequest timeSlotRequest) {
-
-        TimeSlot requestedTimeSlot = getAppointmentTimeSlotById(timeSlotRequest.getHcpId(), timeSlotRequest.getTimeSlotId());
-
-        if (requestedTimeSlot == null) {
-            return ResponseEntity.badRequest().body("Requested slot not found");
-        }
-
-        Long epochRequestedDate = TimeSlotService.getLocalDate(timeSlotRequest.getBookingDate()).toEpochDay();
-
-        if (appointmentService.alreadyExist(timeSlotRequest, epochRequestedDate)) {
-            return ResponseEntity.badRequest().body("Appointment Already Exist");
-        }
-
-        Appointment savedAppointment = appointmentService.createAppointment(timeSlotRequest);
-
-        return ResponseEntity.ok(savedAppointment);
+    public List<TimeSlot> getAvailableTimeSlotsBySpeciality(Speciality speciality, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return timeSlotRepository.findByUser_SpecialityAndIsBookedFalse(speciality, pageable).getContent();
     }
 
-    public TimeSlot getAppointmentTimeSlotById(Long hcpId, Long timeSlotId) {
-        List<TimeSlot> timeSlots = timeSlotRepository.getAllByHcpId(hcpId);
-        for (TimeSlot currentTimeSlot : timeSlots) {
-            if (currentTimeSlot.getId().equals(timeSlotId)) {
-                return currentTimeSlot;
-            }
-        }
-        return null;
+    public void deleteAllTimeSlotsByUser(Long userId) {
+        timeSlotRepository.deleteByUser_Id(userId);
     }
 
-    public TimeSlotResponse getLiveTimeSlotStatus(TimeSlotStatusRequest timeSlotStatusRequest) {
-
-        Long hcpId = timeSlotStatusRequest.getHcpId();
-        Long clientId = timeSlotStatusRequest.getClientId();
-        Date currentDate = timeSlotStatusRequest.getCurrentDate();
-
-        if (StringUtils.isEmpty(hcpId) || currentDate == null) return null;
-
-        Long epochValueOfCurrDate = TimeSlotService.getLocalDate(currentDate).toEpochDay();
-
-        List<TimeSlot> timeSlotList = timeSlotRepository.getAllByHcpId(hcpId);
-
-        if (timeSlotList == null || timeSlotList.size() == 0) {
-            return new TimeSlotResponse(null, "No slots found");
-        } else {
-            for (TimeSlot currentTimeSlot : timeSlotList) {
-                List<Appointment> savedAppointment = appointmentService.findAppointmentByTimeSlot(currentTimeSlot, clientId);
-                if (savedAppointment != null) {
-                    for (Appointment appointment : savedAppointment) {
-                        Long epochBookedDate = TimeSlotService.getLocalDate(appointment.getAppointmentDate()).toEpochDay();
-                        if (epochBookedDate.equals(epochValueOfCurrDate)) {
-                            currentTimeSlot.setBookedBySameClient(true);
-                            break;
-                        }
-                    }
-                }
-                List<Appointment> savedByOther = appointmentService.findBookedAppointment(currentTimeSlot);
-                if (savedByOther != null) {
-                    for (Appointment appointment : savedByOther) {
-                        Long epochBookedDate = TimeSlotService.getLocalDate(appointment.getAppointmentDate()).toEpochDay();
-                        if (epochBookedDate.equals(epochValueOfCurrDate)) {
-                            currentTimeSlot.setBooked(true);
-                            break;
-                        }
-                    }
-                }
-            }
-            return new TimeSlotResponse(timeSlotList, "Fetched");
-        }
+    public void deleteTimeSlot(Long id) {
+        timeSlotRepository.deleteById(id);
     }
 
-    public TimeSlot deleteTimeSlotById(Long slotId) {
-        TimeSlot deletedTimeSlot;
+    public void updateTimeSlot(Long id, TimeSlot updatedTimeSlot) {
+        TimeSlot existingTimeSlot = timeSlotRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("TimeSlot", "id", id));
 
-        if (timeSlotRepository.findById(slotId).isPresent()) {
-            deletedTimeSlot = timeSlotRepository.findById(slotId).get();
-        } else {
-            return null;
-        }
+        existingTimeSlot.setStartTime(updatedTimeSlot.getStartTime());
+        existingTimeSlot.setEndTime(updatedTimeSlot.getEndTime());
+        existingTimeSlot.setDayOfWeek(updatedTimeSlot.getDayOfWeek());
+        existingTimeSlot.setMonth(updatedTimeSlot.getMonth());
+        existingTimeSlot.setYear(updatedTimeSlot.getYear());
+        existingTimeSlot.setUser(updatedTimeSlot.getUser());
+        existingTimeSlot.setAppointment(updatedTimeSlot.getAppointment());
+        existingTimeSlot.setBooked(updatedTimeSlot.isBooked());
 
-        timeSlotRepository.delete(deletedTimeSlot);
-        return deletedTimeSlot;
+        timeSlotRepository.save(existingTimeSlot);
     }
+
+    public TimeSlot getTimeSlotById(Long id) {
+        return timeSlotRepository.findById(id)
+                .orElseThrow();
+    }
+
 }

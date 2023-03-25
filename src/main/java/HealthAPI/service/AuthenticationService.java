@@ -1,9 +1,8 @@
 package HealthAPI.service;
 
-
 import HealthAPI.dto.AuthenticationRequest;
 import HealthAPI.dto.AuthenticationResponse;
-import HealthAPI.dto.ClientCreateDto;
+import HealthAPI.dto.Client.ClientCreateDto;
 import HealthAPI.model.Client;
 import HealthAPI.model.User;
 

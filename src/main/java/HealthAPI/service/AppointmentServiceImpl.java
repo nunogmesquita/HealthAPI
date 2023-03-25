@@ -1,9 +1,7 @@
 package HealthAPI.service;
 
-import HealthAPI.dto.TimeSlotBookingRequest;
 import HealthAPI.model.Appointment;
 import HealthAPI.model.Status;
-import HealthAPI.model.TimeSlot;
 import HealthAPI.repository.AppointmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,60 +19,20 @@ public class AppointmentServiceImpl implements AppointmentService {
         this.appointmentRepository = appointmentRepository;
     }
 
-    public Appointment createAppointment(TimeSlotBookingRequest timeSlotRequest) {
-        Appointment appointment = Appointment.builder()
-                .appointmentDate(timeSlotRequest.getBookingDate())
-                .hcpId(timeSlotRequest.getHcpId())
-                .clientId(timeSlotRequest.getClientId())
-                .timeSlotId(timeSlotRequest.getTimeSlotId())
-                .build();
+    public Appointment createAppointment(Appointment appointment) {
+        return appointmentRepository.save(appointment);
+    }
 
-        appointmentRepository.save(appointment);
-
+    public Appointment findAppointmentById(Long id) {
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow();
         return appointment;
     }
 
-    public List<Appointment> findAppointmentByTimeSlot(TimeSlot currentTimeSlot, Long clientId) {
-        return appointmentRepository.findAllByTimeSlotIdAndHcpIdAndClientId(
-                currentTimeSlot.getId(),
-                currentTimeSlot.getHcpId(), clientId);
-    }
-
-    public List<Appointment> findBookedAppointment(TimeSlot currentTimeSlot) {
-        return appointmentRepository.findAllByTimeSlotIdAndHcpId(currentTimeSlot.getId(), currentTimeSlot.getHcpId());
-    }
-
-    public boolean alreadyExist(TimeSlotBookingRequest timeSlotRequest, Long epochRequestedDate) {
-
-        List<Appointment> appointmentList = appointmentRepository
-                .findAllByTimeSlotIdAndHcpIdAndClientId(timeSlotRequest.getTimeSlotId(),
-                        timeSlotRequest.getHcpId(), timeSlotRequest.getClientId());
-
-        for (Appointment appointment : appointmentList) {
-            Long epochBookedDate = TimeSlotService.getLocalDate(appointment.getAppointmentDate())
-                    .toEpochDay();
-
-            if (epochBookedDate.equals(epochRequestedDate)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public Appointment findById(Long id) {
-        if (appointmentRepository.findById(id).isPresent()) {
-            Appointment appointment = appointmentRepository.findById(id).get();
-            return appointment;
-        }
-        return null;
-    }
-
-    public Appointment deleteById(Long id) {
-        Appointment fetchedAppointment = findById(id);
+    public Appointment deleteAppointmentById(Long id) {
+        Appointment fetchedAppointment = findAppointmentById(id);
         if (fetchedAppointment != null) {
             fetchedAppointment.setSTATUS(Status.INACTIVE);
-
             appointmentRepository.save(fetchedAppointment);
             return fetchedAppointment;
         }
@@ -99,7 +57,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointmentRepository.findAllByClientIdAndSTATUS(clientId, Status.ACTIVE);
     }
 
-    public List<Appointment> findAllByHcpId(Long hcpId) {
-        return appointmentRepository.findAllByHcpIdAndSTATUS(hcpId, Status.ACTIVE);
+    public List<Appointment> findAllByUserId(Long userId) {
+        return appointmentRepository.findAllByUserIdAndSTATUS(userId, Status.ACTIVE);
     }
+
 }

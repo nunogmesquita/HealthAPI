@@ -1,30 +1,59 @@
 package HealthAPI.controller;
 
+import HealthAPI.converter.UserConverter;
 import HealthAPI.dto.AppointmentResponse;
 import HealthAPI.dto.BaseResponse;
 import HealthAPI.model.Appointment;
+import HealthAPI.model.Client;
+import HealthAPI.model.TimeSlot;
+import HealthAPI.model.User;
 import HealthAPI.service.AppointmentService;
+import HealthAPI.service.ClientService;
+import HealthAPI.service.TimeSlotService;
+import HealthAPI.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
 
 @RestController
 @RequestMapping("/appointment")
-public class AppointmentController extends ApiCrudController {
+public class AppointmentController {
+
+    private final UserService userService;
+    private final TimeSlotService timeSlotService;
+    private final ClientService clientService;
+    private final AppointmentService appointmentService;
 
     @Autowired
-    private AppointmentService appointmentService;
+    public AppointmentController(UserService userService, TimeSlotService timeSlotService, ClientService clientService,
+                                 AppointmentService appointmentService) {
+        this.userService = userService;
+        this.timeSlotService = timeSlotService;
+        this.clientService = clientService;
+        this.appointmentService = appointmentService;
+    }
 
+    @PostMapping("/create")
+    public Appointment createAppointment(@RequestParam Long userId,
+                                         @RequestParam Long timeSlotId,
+                                         @RequestParam Long clientId) {
+        User user = userService.getUserById(userId);
+        TimeSlot timeSlot = timeSlotService.getTimeSlotById(timeSlotId);
+        Client client = clientService.getClientById(clientId);
+        Appointment appointment = Appointment.builder()
+                .user(user)
+                .timeSlot(timeSlot)
+                .client(client)
+                .build();
+        return appointmentService.createAppointment(appointment);
+    }
 
-    @Override
-    public BaseResponse<Appointment> getById(Long id) {
-        Appointment appointment = appointmentService.findById(id);
+    @GetMapping("/{id}")
+    public BaseResponse<Appointment> getAppointmentById(@PathVariable Long id) {
+        Appointment appointment = appointmentService.findAppointmentById(id);
         if (appointment != null) {
             return new BaseResponse<>(appointment, "FETCHED");
         } else {
@@ -32,10 +61,9 @@ public class AppointmentController extends ApiCrudController {
         }
     }
 
-
-    @Override
-    public BaseResponse<Appointment> deleteById(Long id) {
-        Appointment appointment = appointmentService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public BaseResponse<Appointment> deleteAppointmentById(@PathVariable Long id) {
+        Appointment appointment = appointmentService.deleteAppointmentById(id);
         if (appointment != null) {
             return new BaseResponse<>(appointment, "DELETED");
         } else {
@@ -43,8 +71,8 @@ public class AppointmentController extends ApiCrudController {
         }
     }
 
-    @Override
-    public BaseResponse<Appointment> restoreById(Long id) {
+    @PatchMapping("/{id}")
+    public BaseResponse<Appointment> restoreById(@PathVariable Long id) {
         ResponseEntity<?> responseEntity = appointmentService.restoreById(id);
         if (responseEntity != null) {
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
@@ -55,7 +83,6 @@ public class AppointmentController extends ApiCrudController {
         }
         return new BaseResponse<>(null, "NOT FOUND");
     }
-
 
     @GetMapping("/getAllByClientId")
     public AppointmentResponse getAllAppointmentByClientId(@RequestParam Long clientId) {
@@ -68,13 +95,14 @@ public class AppointmentController extends ApiCrudController {
         }
     }
 
-    @GetMapping("/getAllByHcpId")
-    public AppointmentResponse getAllAppointmentByHcpId(@RequestParam Long hcpId) {
-        List<Appointment> appointmentList = appointmentService.findAllByHcpId(hcpId);
+    @GetMapping("/getAllByUserId")
+    public AppointmentResponse getAllAppointmentByUserId(@RequestParam Long userId) {
+        List<Appointment> appointmentList = appointmentService.findAllByUserId(userId);
         if (appointmentList == null || appointmentList.size() == 0) {
             return new AppointmentResponse(null, "NOT AVAILABLE");
         } else {
             return new AppointmentResponse(appointmentList, "FETCHED");
         }
     }
+
 }

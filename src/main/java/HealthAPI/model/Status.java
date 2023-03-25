@@ -1,5 +1,6 @@
 package HealthAPI.model;
 
 public enum Status {
-  ACTIVE, INACTIVE
+    ACTIVE,
+    INACTIVE
 }

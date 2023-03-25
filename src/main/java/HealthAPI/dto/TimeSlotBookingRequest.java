@@ -21,8 +21,9 @@ public class TimeSlotBookingRequest {
     private Long timeSlotId;
 
     @NotNull
-    private Date bookingDate; // Parse only the Date not the time.
+    private Date bookingDate;
 
     @NotNull
-    private Long clientId; // User for reference to the user.
+    private Long clientId;
+
 }
