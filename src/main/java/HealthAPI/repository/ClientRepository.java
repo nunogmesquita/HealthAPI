@@ -14,7 +14,7 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
 
     Client findByTokens(String jwt);
 
-    List<Client> findByDeletedFalse();
+    List<Client> findByDeleted(Boolean deleted);
 
     Optional<Client> findById(Long id);
 

@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -33,14 +32,18 @@ public class UserController {
     }
 
     @GetMapping("/all")
-    @Secured("ROLE_ADMIN")
     public ResponseEntity<List<UserDto>> getAllUsers() {
         List<UserDto> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
+    @GetMapping("/allInactive")
+    public ResponseEntity<List<UserDto>> getAllDeletedUsers() {
+        List<UserDto> users = userService.getAllDeletedUsers();
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+
     @GetMapping("/{id}")
-    @Secured({"ROLE_ADMIN"})
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
         User user = userService.getUserById(id);
         UserDto userDto = userConverter.fromUserToUserDto(user);
@@ -55,8 +58,7 @@ public class UserController {
     }
 
     @PostMapping("")
-    @Secured("ROLE_ADMIN")
-    public ResponseEntity<UserCreateDto> createUser(@Valid @RequestBody UserCreateDto user, BindingResult bindingResult) {
+    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserCreateDto user, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<FieldError> errors = bindingResult.getFieldErrors();
             for (FieldError error : errors) {
@@ -64,19 +66,17 @@ public class UserController {
             }
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        UserCreateDto savedUser = userService.createUser(user);
+        UserDto savedUser = userService.createUser(user);
         return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}")
-    @Secured("ROLE_ADMIN")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @Valid @RequestBody UserCreateDto userCreateDto) {
         UserDto user = userService.updateUser(id, userCreateDto);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @PatchMapping("/myAccount")
-    @Secured({"ROLE_ADMIN", "ROLE_HEALTHCAREPROVIDERS"})
     public ResponseEntity<UserDto> updateMyAccount(@NonNull HttpServletRequest request, @Valid @RequestBody UserCreateDto userCreateDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
 
@@ -92,7 +92,6 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @Secured("ROLE_ADMIN")
     public ResponseEntity<String> deleteAccount(@PathVariable Long id) {
         userService.deleteUser(id);
         return new ResponseEntity<>(Responses.DELETED_USER.formatted(id), HttpStatus.OK);

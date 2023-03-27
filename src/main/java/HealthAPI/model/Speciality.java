@@ -9,10 +9,16 @@ public enum Speciality {
     PQ("Psiquiatria"),
     PSI("Psicologia");
 
-    String name;
+    public String name;
 
     Speciality(String name) {
         this.name = name;
     }
 
+    @Override
+    public String toString() {
+        return "Speciality{" +
+                "name='" + name + '\'' +
+                '}';
+    }
 }

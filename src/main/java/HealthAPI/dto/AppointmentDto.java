@@ -1,21 +1,23 @@
 package HealthAPI.dto;
 
-import HealthAPI.model.TimeSlot;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-@Getter
-@Setter
 @Builder
-@ToString
-@NoArgsConstructor
+@Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class AppointmentDto {
-    @NotNull(message = "You meed to choose a schedule.")
-    TimeSlot timeSlot;
-    @NotNull(message = "Must have a client associated.")
-    private Long clientId;
+
+    String professional;
+
+    String speciality;
+
+    int year;
+
+    int month;
+
+    String hour;
+
+    String client;
 
 }

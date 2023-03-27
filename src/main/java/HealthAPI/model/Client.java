@@ -25,7 +25,7 @@ public class Client implements UserDetails {
     String fullName;
 
     @Column(nullable = false)
-    @Pattern(regexp = "/^([9][1236])[0-9]*$/", message = "Please insert a valid phone number.")
+    @Pattern(regexp = "^([9][1236])[0-9]*$", message = "Please insert a valid phone number.")
     int phoneNumber;
 
     @Column(nullable = false, unique = true)
@@ -54,7 +54,7 @@ public class Client implements UserDetails {
             message = "Invalid NIF.")
     private int NIF;
 
-    @OneToOne
+    @ManyToOne
     private Address address;
 
     @OneToMany

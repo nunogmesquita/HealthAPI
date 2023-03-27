@@ -2,6 +2,8 @@ package HealthAPI.service;
 
 import HealthAPI.converter.TimeSlotConverter;
 import HealthAPI.converter.UserConverter;
+import HealthAPI.dto.TimeSlot.TimeSlotDto;
+import HealthAPI.dto.TimeSlot.TimeSlotUpdateDto;
 import HealthAPI.dto.TimeSlot.WeeklyTimeSlotDto;
 import HealthAPI.dto.User.UserDto;
 import HealthAPI.exceptions.ResourceNotFoundException;
@@ -76,20 +78,29 @@ public class TimeSlotService {
         }
     }
 
-    public List<TimeSlot> getAvailableTimeSlots(int page, int size) {
+    public List<TimeSlotDto> getAvailableTimeSlots(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-
-        return timeSlotRepository.findByIsBookedFalse(pageable).getContent();
+        List<TimeSlot> timeSlots = timeSlotRepository.findByIsBookedFalse(pageable).getContent();
+        return timeSlots.parallelStream()
+                .map(timeSlotConverter::fromTimeSlotToTimeSlotDto)
+                .toList();
     }
 
-    public List<TimeSlot> getAvailableTimeSlotsByUser(Long userId, int page, int size) {
+    public List<TimeSlotDto> getAvailableTimeSlotsByUser(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return timeSlotRepository.findByUserAndIsBookedFalse(userId, pageable).getContent();
+        List<TimeSlot> timeSlots = timeSlotRepository.findByUserAndIsBookedFalse(userId, pageable).getContent();
+        return timeSlots.parallelStream()
+                .map(timeSlotConverter::fromTimeSlotToTimeSlotDto)
+                .toList();
     }
 
-    public List<TimeSlot> getAvailableTimeSlotsBySpeciality(Speciality speciality, int page, int size) {
+    public List<TimeSlotDto> getAvailableTimeSlotsBySpeciality(Speciality speciality, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return timeSlotRepository.findByUser_SpecialityAndIsBookedFalse(speciality, pageable).getContent();
+        List<TimeSlot> timeSlots = timeSlotRepository.findByUser_SpecialityAndIsBookedFalse(speciality, pageable).getContent();
+        return timeSlots.parallelStream()
+                .map(timeSlotConverter::fromTimeSlotToTimeSlotDto)
+                .toList();
+
     }
 
     public void deleteAllTimeSlotsByUser(Long userId) {
@@ -100,20 +111,16 @@ public class TimeSlotService {
         timeSlotRepository.deleteById(id);
     }
 
-    public void updateTimeSlot(Long id, TimeSlot updatedTimeSlot) {
+    public TimeSlotDto updateTimeSlot(Long id, TimeSlotUpdateDto updatedTimeSlot) {
         TimeSlot existingTimeSlot = timeSlotRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("TimeSlot", "id", id));
 
-        existingTimeSlot.setStartTime(updatedTimeSlot.getStartTime());
-        existingTimeSlot.setEndTime(updatedTimeSlot.getEndTime());
+        existingTimeSlot.setStartTime(updatedTimeSlot.getTime());
         existingTimeSlot.setDayOfWeek(updatedTimeSlot.getDayOfWeek());
         existingTimeSlot.setMonth(updatedTimeSlot.getMonth());
         existingTimeSlot.setYear(updatedTimeSlot.getYear());
-        existingTimeSlot.setUser(updatedTimeSlot.getUser());
-        existingTimeSlot.setAppointment(updatedTimeSlot.getAppointment());
-        existingTimeSlot.setBooked(updatedTimeSlot.isBooked());
-
         timeSlotRepository.save(existingTimeSlot);
+        return timeSlotConverter.fromTimeSlotToTimeSlotDto(existingTimeSlot);
     }
 
     public TimeSlot getTimeSlotById(Long id) {

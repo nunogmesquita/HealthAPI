@@ -1,10 +1,11 @@
 package HealthAPI.controller;
 
+import HealthAPI.dto.TimeSlot.TimeSlotDto;
+import HealthAPI.dto.TimeSlot.TimeSlotUpdateDto;
 import HealthAPI.dto.TimeSlot.WeeklyTimeSlotDto;
 import HealthAPI.dto.User.UserDto;
 import HealthAPI.messages.Responses;
 import HealthAPI.model.Speciality;
-import HealthAPI.model.TimeSlot;
 import HealthAPI.service.TimeSlotService;
 import HealthAPI.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,7 +30,7 @@ public class TimeSlotController {
         this.userService = userService;
     }
 
-    @PostMapping("/create")
+    @PatchMapping("/create")
     public ResponseEntity<String> generateWeeklyTimeSlots(@NonNull HttpServletRequest request,
                                                           @RequestBody WeeklyTimeSlotDto weeklyTimeSlotDto) {
         String jwt = request.getHeader("Authorization").substring(7);
@@ -39,35 +40,42 @@ public class TimeSlotController {
     }
 
     @GetMapping("/available")
-    public List<TimeSlot> getAvailableTimeSlots(@RequestParam(defaultValue = "0") int page) {
-        return timeSlotService.getAvailableTimeSlots(page, page + 10);
+    public ResponseEntity<List<TimeSlotDto>> getAvailableTimeSlots(@RequestParam(defaultValue = "0") int page) {
+        List<TimeSlotDto> timeSlotDtos = timeSlotService.getAvailableTimeSlots(page, page + 10);
+        return new ResponseEntity<>(timeSlotDtos, HttpStatus.OK);
     }
 
     @GetMapping("/available/{userId}")
-    public List<TimeSlot> getAvailableTimeSlotsByUser(@PathVariable Long userId,
-                                                      @RequestParam(defaultValue = "0") int page) {
-        return timeSlotService.getAvailableTimeSlotsByUser(userId, page, page + 10);
+    public ResponseEntity<List<TimeSlotDto>> getAvailableTimeSlotsByUser(@PathVariable Long userId,
+                                                         @RequestParam(defaultValue = "0") int page) {
+        List<TimeSlotDto> timeSlotDtos = timeSlotService.getAvailableTimeSlotsByUser(userId, page, page + 10);
+        return new ResponseEntity<>(timeSlotDtos, HttpStatus.OK);
     }
 
-    @GetMapping("/available/speciality/{speciality}")
-    public List<TimeSlot> getAvailableTimeSlotsBySpeciality(@PathVariable Speciality speciality,
-                                                            @RequestParam(defaultValue = "0") int page) {
-        return timeSlotService.getAvailableTimeSlotsBySpeciality(speciality, page, page + 10);
+    @GetMapping("/available/{speciality}")
+    public ResponseEntity<List<TimeSlotDto>> getAvailableTimeSlotsBySpeciality(@PathVariable Speciality speciality,
+                                                               @RequestParam(defaultValue = "0") int page) {
+        List<TimeSlotDto> timeSlotDtos = timeSlotService.getAvailableTimeSlotsBySpeciality(speciality, page, page + 10);
+        return new ResponseEntity<>(timeSlotDtos, HttpStatus.OK);
     }
 
     @DeleteMapping("/byUser/{userId}")
-    public void deleteAllTimeSlotsByUser(@PathVariable Long userId) {
+    public ResponseEntity<String> deleteAllTimeSlotsByUser(@PathVariable Long userId) {
         timeSlotService.deleteAllTimeSlotsByUser(userId);
+        return new ResponseEntity<>(Responses.DELETED_ALL_USERS_TIMESLOTS.formatted(userId), HttpStatus.OK);
+
     }
 
     @DeleteMapping("/{id}")
-    public void deleteTimeSlot(@PathVariable Long id) {
+    public ResponseEntity<String> deleteTimeSlot(@PathVariable Long id) {
         timeSlotService.deleteTimeSlot(id);
+        return new ResponseEntity<>(Responses.DELETED_TIMESLOT.formatted(id), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public void updateTimeSlot(@PathVariable Long id, @RequestBody TimeSlot updatedTimeSlot) {
-        timeSlotService.updateTimeSlot(id, updatedTimeSlot);
+    public ResponseEntity<TimeSlotDto> updateTimeSlot(@PathVariable Long id, @RequestBody TimeSlotUpdateDto updatedTimeSlot) {
+        TimeSlotDto timeSlot = timeSlotService.updateTimeSlot(id, updatedTimeSlot);
+        return new ResponseEntity<>(timeSlot, HttpStatus.OK);
     }
 
 }

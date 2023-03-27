@@ -1,5 +1,7 @@
 package HealthAPI.converter;
 
+import HealthAPI.dto.User.ProfessionalDto;
+import HealthAPI.dto.User.ProfessionalDto.ProfessionalDtoBuilder;
 import HealthAPI.dto.User.UserCreateDto;
 import HealthAPI.dto.User.UserCreateDto.UserCreateDtoBuilder;
 import HealthAPI.dto.User.UserDto;
@@ -11,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-03-25T16:42:32+0000",
+    date = "2023-03-27T10:29:26+0100",
     comments = "version: 1.4.1.Final, compiler: javac, environment: Java 19.0.1 (Oracle Corporation)"
 )
 @Component
@@ -52,6 +54,23 @@ public class UserConverterImpl implements UserConverter {
     }
 
     @Override
+    public User fromUserDtoToUser(UserDto userDto) {
+        if ( userDto == null ) {
+            return null;
+        }
+
+        UserBuilder user = User.builder();
+
+        user.id( userDto.getId() );
+        user.firstName( userDto.getFirstName() );
+        user.lastName( userDto.getLastName() );
+        user.email( userDto.getEmail() );
+        user.speciality( userDto.getSpeciality() );
+
+        return user.build();
+    }
+
+    @Override
     public UserDto fromUserToUserDto(User user) {
         if ( user == null ) {
             return null;
@@ -69,19 +88,34 @@ public class UserConverterImpl implements UserConverter {
     }
 
     @Override
-    public User fromUserDtoToUser(UserDto userDto) {
-        if ( userDto == null ) {
+    public User fromProfessionalDtoToUser(ProfessionalDto professionalDto) {
+        if ( professionalDto == null ) {
             return null;
         }
 
         UserBuilder user = User.builder();
 
-        user.id( userDto.getId() );
-        user.firstName( userDto.getFirstName() );
-        user.lastName( userDto.getLastName() );
-        user.email( userDto.getEmail() );
-        user.speciality( userDto.getSpeciality() );
+        user.id( professionalDto.getId() );
+        user.firstName( professionalDto.getFirstName() );
+        user.lastName( professionalDto.getLastName() );
+        user.speciality( professionalDto.getSpeciality() );
 
         return user.build();
+    }
+
+    @Override
+    public ProfessionalDto fromUserToProfessionalDto(User user) {
+        if ( user == null ) {
+            return null;
+        }
+
+        ProfessionalDtoBuilder professionalDto = ProfessionalDto.builder();
+
+        professionalDto.id( user.getId() );
+        professionalDto.firstName( user.getFirstName() );
+        professionalDto.lastName( user.getLastName() );
+        professionalDto.speciality( user.getSpeciality() );
+
+        return professionalDto.build();
     }
 }

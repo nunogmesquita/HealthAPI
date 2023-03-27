@@ -1,6 +1,7 @@
 package HealthAPI.service;
 
 import HealthAPI.converter.UserConverter;
+import HealthAPI.dto.User.ProfessionalDto;
 import HealthAPI.dto.User.UserCreateDto;
 import HealthAPI.dto.User.UserDto;
 import HealthAPI.model.Speciality;
@@ -9,7 +10,10 @@ import HealthAPI.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static HealthAPI.model.Role.HEALTHCAREPROVIDER;
 
 @Service
 public class UserService {
@@ -30,15 +34,22 @@ public class UserService {
                 .toList();
     }
 
+    public List<ProfessionalDto> getAllProfessionals() {
+        List<User> users = userRepository.findByRole(HEALTHCAREPROVIDER);
+        return users.parallelStream()
+                .map(userConverter::fromUserToProfessionalDto)
+                .toList();
+    }
+
     public UserDto getUserByToken(String jwt) {
         User user = userRepository.findByTokens(jwt);
         return userConverter.fromUserToUserDto(user);
     }
 
-    public UserCreateDto createUser(UserCreateDto userCreatedDto) {
+    public UserDto createUser(UserCreateDto userCreatedDto) {
         User user = userConverter.fromUserCreateDtoToUser(userCreatedDto);
         user = userRepository.save(user);
-        return userConverter.fromUserToUserCreateDto(user);
+        return userConverter.fromUserToUserDto(user);
     }
 
     public UserDto updateUser(Long id, UserCreateDto userCreateDto) {
@@ -58,20 +69,24 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public String getAllServices() {
-        return Speciality.values().toString();
-        /*
-        List<User> users = userRepository.findByDeletedFalseAndRole();
-        return users.stream()
-                .map(user -> toString())
-                .toString();
-
-         */
+    public List<String> getAllServices() {
+        List<String> services = new ArrayList<>();
+        for (Speciality speciality : Speciality.values()) {
+            services.add(speciality.name);
+        }
+        return services;
     }
 
     public User getUserById(Long id) {
-        return userRepository.findById(id)
+        return userRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow();
     }
 
+
+    public List<UserDto> getAllDeletedUsers() {
+        List<User> users = userRepository.findByDeletedTrue();
+        return users.parallelStream()
+                .map(userConverter::fromUserToUserDto)
+                .toList();
+    }
 }

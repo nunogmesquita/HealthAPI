@@ -1,6 +1,6 @@
 package HealthAPI.dto.Client;
 
-import HealthAPI.model.Address;
+import HealthAPI.dto.AddressDto;
 import HealthAPI.model.Gender;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -51,6 +51,6 @@ public class ClientCreateDto {
             message = "Invalid NIF.")
     private int NIF;
 
-    private Address address;
+    private AddressDto address;
 
 }
