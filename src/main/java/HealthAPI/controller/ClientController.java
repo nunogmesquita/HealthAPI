@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("")
+@RequestMapping("/client")
 public class ClientController {
 
     private final ClientService clientService;
@@ -42,10 +41,8 @@ public class ClientController {
     }
 
     @PatchMapping("/myAccount")
-    @Secured("Client.Class")
     public ResponseEntity<ClientDto> updateMyAccount(@NonNull HttpServletRequest request, @Valid @RequestBody ClientCreateDto clientCreateDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-
             List<FieldError> errors = bindingResult.getFieldErrors();
             for (FieldError error : errors) {
                 System.out.println(error.getObjectName() + " - " + error.getDefaultMessage());

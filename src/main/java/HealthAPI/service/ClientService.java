@@ -1,5 +1,6 @@
 package HealthAPI.service;
 
+import HealthAPI.converter.AddressConverter;
 import HealthAPI.converter.ClientConverter;
 import HealthAPI.dto.Client.ClientCreateDto;
 import HealthAPI.dto.Client.ClientDto;
@@ -15,11 +16,13 @@ public class ClientService {
 
     private final ClientRepository clientRepository;
     private final ClientConverter clientConverter;
+    private final AddressConverter addressConverter;
 
     @Autowired
-    public ClientService(ClientRepository clientRepository, ClientConverter clientConverter) {
+    public ClientService(ClientRepository clientRepository, ClientConverter clientConverter, AddressConverter addressConverter) {
         this.clientRepository = clientRepository;
         this.clientConverter = clientConverter;
+        this.addressConverter = addressConverter;
     }
 
     public ClientDto getClientByToken(String jwt) {
@@ -34,7 +37,7 @@ public class ClientService {
     }
 
     public List<ClientDto> getAllClients() {
-        List<Client> clients = clientRepository.findByDeletedFalse();
+        List<Client> clients = clientRepository.findByDeleted(false);
         return clients.parallelStream()
                 .map(clientConverter::fromClientToClientDto)
                 .toList();
@@ -49,7 +52,7 @@ public class ClientService {
         client.setBirthDate(clientCreateDto.getBirthDate());
         client.setGender(clientCreateDto.getGender());
         client.setNIF(clientCreateDto.getNIF());
-        client.setAddress(clientCreateDto.getAddress());
+        client.setAddress(addressConverter.fromAddressDtoToAddress(clientCreateDto.getAddress()));
         clientRepository.save(client);
         return clientConverter.fromClientToClientDto(client);
     }

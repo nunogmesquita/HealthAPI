@@ -1,21 +1,19 @@
 package HealthAPI.controller;
 
-import HealthAPI.dto.AppointmentResponse;
-import HealthAPI.dto.BaseResponse;
+import HealthAPI.dto.AppointmentCreateDto;
+import HealthAPI.dto.AppointmentDto;
+import HealthAPI.messages.Responses;
 import HealthAPI.model.Appointment;
-import HealthAPI.model.Client;
-import HealthAPI.model.TimeSlot;
-import HealthAPI.model.User;
 import HealthAPI.service.AppointmentService;
 import HealthAPI.service.ClientService;
 import HealthAPI.service.TimeSlotService;
 import HealthAPI.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/appointment")
@@ -36,72 +34,39 @@ public class AppointmentController {
     }
 
     @PostMapping("/create")
-    public Appointment createAppointment(@RequestParam Long userId,
-                                         @RequestParam Long timeSlotId,
-                                         @RequestParam Long clientId) {
-        User user = userService.getUserById(userId);
-        TimeSlot timeSlot = timeSlotService.getTimeSlotById(timeSlotId);
-        Client client = clientService.getClientById(clientId);
-        Appointment appointment = Appointment.builder()
-                .user(user)
-                .timeSlot(timeSlot)
-                .client(client)
-                .build();
-        return appointmentService.createAppointment(appointment);
+    public ResponseEntity<AppointmentDto> createAppointment(@RequestBody AppointmentCreateDto appointmentCreateDto) {
+        AppointmentDto appointmentDto = appointmentService.createAppointment(appointmentCreateDto);
+        return new ResponseEntity<>(appointmentDto, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public BaseResponse<Appointment> getAppointmentById(@PathVariable Long id) {
-        Appointment appointment = appointmentService.findAppointmentById(id);
-        if (appointment != null) {
-            return new BaseResponse<>(appointment, "FETCHED");
-        } else {
-            return new BaseResponse<>(null, "NOT FOUND");
-        }
+    public ResponseEntity<AppointmentDto> getAppointmentById(@PathVariable Long id) {
+        AppointmentDto appointmentDto = appointmentService.findAppointmentById(id);
+        return new ResponseEntity<>(appointmentDto, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public BaseResponse<Appointment> deleteAppointmentById(@PathVariable Long id) {
-        Appointment appointment = appointmentService.deleteAppointmentById(id);
-        if (appointment != null) {
-            return new BaseResponse<>(appointment, "DELETED");
-        } else {
-            return new BaseResponse<>(null, "NOT FOUND");
-        }
+    public ResponseEntity<String> deleteAppointmentById(@PathVariable Long id) {
+        appointmentService.deleteAppointmentById(id);
+        return new ResponseEntity<>(Responses.DELETED_APPOINTMENT.formatted(id), HttpStatus.OK);
     }
 
     @PatchMapping("/{id}")
-    public BaseResponse<Appointment> restoreById(@PathVariable Long id) {
-        ResponseEntity<?> responseEntity = appointmentService.restoreById(id);
-        if (responseEntity != null) {
-            if (responseEntity.getStatusCode().is2xxSuccessful()) {
-                return new BaseResponse<>((Appointment) responseEntity.getBody(), "RESTORED");
-            } else if (responseEntity.getStatusCode().is4xxClientError()) {
-                return new BaseResponse<>(null, Objects.requireNonNull(responseEntity.getBody()).toString());
-            }
-        }
-        return new BaseResponse<>(null, "NOT FOUND");
+    public ResponseEntity<AppointmentDto> restoreById(@PathVariable Long id) {
+        AppointmentDto appointmentDto = appointmentService.restoreById(id);
+        return new ResponseEntity<>(appointmentDto, HttpStatus.OK);
     }
 
     @GetMapping("/getAllByClientId")
-    public AppointmentResponse getAllAppointmentByClientId(@RequestParam Long clientId) {
-        List<Appointment> appointmentList = appointmentService.findAllByClientId(clientId);
-
-        if (appointmentList == null || appointmentList.size() == 0) {
-            return new AppointmentResponse(null, "NOT AVAILABLE");
-        } else {
-            return new AppointmentResponse(appointmentList, "FETCHED");
-        }
+    public ResponseEntity<List<AppointmentDto>> getAllAppointmentByClientId(@RequestParam Long clientId) {
+        List<AppointmentDto> appointmentList = appointmentService.findAllByClientId(clientId);
+        return new ResponseEntity<>(appointmentList, HttpStatus.OK);
     }
 
     @GetMapping("/getAllByUserId")
-    public AppointmentResponse getAllAppointmentByUserId(@RequestParam Long userId) {
-        List<Appointment> appointmentList = appointmentService.findAllByUserId(userId);
-        if (appointmentList == null || appointmentList.size() == 0) {
-            return new AppointmentResponse(null, "NOT AVAILABLE");
-        } else {
-            return new AppointmentResponse(appointmentList, "FETCHED");
-        }
+    public ResponseEntity<List<AppointmentDto>> getAllAppointmentByUserId(@RequestParam Long userId) {
+        List<AppointmentDto> appointmentList = appointmentService.findAllByUserId(userId);
+        return new ResponseEntity<>(appointmentList, HttpStatus.OK);
     }
 
 }

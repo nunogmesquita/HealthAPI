@@ -1,7 +1,7 @@
 package HealthAPI.dto.Client;
 
+import HealthAPI.dto.AddressDto;
 import HealthAPI.model.Gender;
-import HealthAPI.model.Address;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,6 +29,6 @@ public class ClientDto {
 
     private int NIF;
 
-    private Address address;
+    private AddressDto address;
 
 }

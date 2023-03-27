@@ -13,21 +13,21 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthenticationController {
 
-    private final AuthenticationService service;
+    private final AuthenticationService authenticationService;
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(@RequestBody ClientCreateDto request) {
-        return ResponseEntity.ok(service.register(request));
+        return ResponseEntity.ok(authenticationService.register(request));
     }
 
     @PostMapping("/user")
     public ResponseEntity<AuthenticationResponse> authUser(@RequestBody AuthenticationRequest request) {
-        return ResponseEntity.ok(service.authenticateUser(request));
+        return ResponseEntity.ok(authenticationService.authenticateUser(request));
     }
 
     @PostMapping("/client")
     public ResponseEntity<AuthenticationResponse> authClient(@RequestBody AuthenticationRequest request) {
-        return ResponseEntity.ok(service.authenticateClient(request));
+        return ResponseEntity.ok(authenticationService.authenticateClient(request));
     }
 
 }

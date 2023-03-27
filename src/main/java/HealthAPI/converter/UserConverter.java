@@ -1,5 +1,6 @@
 package HealthAPI.converter;
 
+import HealthAPI.dto.User.ProfessionalDto;
 import HealthAPI.dto.User.UserCreateDto;
 import HealthAPI.dto.User.UserDto;
 import HealthAPI.model.User;
@@ -12,8 +13,12 @@ public interface UserConverter {
 
     UserCreateDto fromUserToUserCreateDto(User user);
 
+    User fromUserDtoToUser(UserDto userDto);
+
     UserDto fromUserToUserDto(User user);
 
-    User fromUserDtoToUser(UserDto userDto);
+    User fromProfessionalDtoToUser(ProfessionalDto professionalDto);
+
+    ProfessionalDto fromUserToProfessionalDto(User user);
 
 }
