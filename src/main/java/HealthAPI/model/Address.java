@@ -1,4 +1,4 @@
-package HealthAPI.model.address;
+package HealthAPI.model;
 
 import HealthAPI.model.User;
 import jakarta.persistence.*;

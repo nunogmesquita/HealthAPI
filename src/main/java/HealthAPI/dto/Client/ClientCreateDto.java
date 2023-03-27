@@ -1,6 +1,6 @@
 package HealthAPI.dto.Client;
 
-import HealthAPI.model.address.Address;
+import HealthAPI.model.Address;
 import HealthAPI.model.Gender;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

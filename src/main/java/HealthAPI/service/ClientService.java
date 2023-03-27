@@ -1,20 +1,62 @@
 package HealthAPI.service;
 
+import HealthAPI.converter.ClientConverter;
 import HealthAPI.dto.Client.ClientCreateDto;
 import HealthAPI.dto.Client.ClientDto;
 import HealthAPI.model.Client;
+import HealthAPI.repository.ClientRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-public interface ClientService {
+@Service
+public class ClientService {
 
-    ClientDto getClientByToken(String jwt);
+    private final ClientRepository clientRepository;
+    private final ClientConverter clientConverter;
 
-    void deleteClient(Long id);
+    @Autowired
+    public ClientService(ClientRepository clientRepository, ClientConverter clientConverter) {
+        this.clientRepository = clientRepository;
+        this.clientConverter = clientConverter;
+    }
 
-    List<ClientDto> getAllClients();
+    public ClientDto getClientByToken(String jwt) {
+        Client client = clientRepository.findByTokens(jwt);
+        return clientConverter.fromClientToClientDto(client);
+    }
 
-    ClientDto updateClient(Long id, ClientCreateDto clientCreateDto);
+    public void deleteClient(Long clientId) {
+        Client client = clientRepository.findById(clientId).orElseThrow();
+        client.markAsDeleted();
+        clientRepository.save(client);
+    }
 
-    Client getClientById (Long id);
+    public List<ClientDto> getAllClients() {
+        List<Client> clients = clientRepository.findByDeletedFalse();
+        return clients.parallelStream()
+                .map(clientConverter::fromClientToClientDto)
+                .toList();
+    }
+
+    public ClientDto updateClient(Long id, ClientCreateDto clientCreateDto) {
+        Client client = clientRepository.getReferenceById(id);
+        client.setFullName(clientCreateDto.getFullName());
+        client.setPhoneNumber(clientCreateDto.getPhoneNumber());
+        client.setEmail(clientCreateDto.getEmail());
+        client.setPassword(clientCreateDto.getPassword());
+        client.setBirthDate(clientCreateDto.getBirthDate());
+        client.setGender(clientCreateDto.getGender());
+        client.setNIF(clientCreateDto.getNIF());
+        client.setAddress(clientCreateDto.getAddress());
+        clientRepository.save(client);
+        return clientConverter.fromClientToClientDto(client);
+    }
+
+    public Client getClientById(Long id) {
+        return clientRepository.findById(id)
+                .orElseThrow();
+    }
+
 }

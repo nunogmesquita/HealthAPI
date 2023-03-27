@@ -1,6 +1,5 @@
 package HealthAPI.controller;
 
-import HealthAPI.converter.UserConverter;
 import HealthAPI.dto.AppointmentResponse;
 import HealthAPI.dto.BaseResponse;
 import HealthAPI.model.Appointment;
