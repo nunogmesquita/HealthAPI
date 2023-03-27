@@ -5,13 +5,12 @@ import HealthAPI.dto.AppointmentCreateDto;
 import HealthAPI.dto.AppointmentDto;
 import HealthAPI.model.*;
 import HealthAPI.repository.AppointmentRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
@@ -19,6 +18,15 @@ public class AppointmentService {
     private final ClientService clientService;
     private final TimeSlotService timeSlotService;
     private final AppointmentConverter appointmentConverter;
+
+    @Autowired
+    public AppointmentService(AppointmentRepository appointmentRepository, UserService userService, ClientService clientService, TimeSlotService timeSlotService, AppointmentConverter appointmentConverter) {
+        this.appointmentRepository = appointmentRepository;
+        this.userService = userService;
+        this.clientService = clientService;
+        this.timeSlotService = timeSlotService;
+        this.appointmentConverter = appointmentConverter;
+    }
 
     public AppointmentDto createAppointment(AppointmentCreateDto appointmentCreateDto) {
         User user = userService.getUserById(appointmentCreateDto.getUserId());

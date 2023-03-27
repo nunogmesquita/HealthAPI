@@ -8,6 +8,7 @@ import HealthAPI.model.Speciality;
 import HealthAPI.model.User;
 import HealthAPI.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ public class UserService {
         this.userConverter = userConverter;
     }
 
+    @Cacheable(value = "usersCache")
     public List<UserDto> getAllUsers() {
         List<User> users = userRepository.findByDeletedFalse();
         return users.parallelStream()
@@ -77,6 +79,7 @@ public class UserService {
         return services;
     }
 
+    @Cacheable(value = "userCache")
     public User getUserById(Long id) {
         return userRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow();

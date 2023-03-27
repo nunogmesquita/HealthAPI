@@ -15,3 +15,9 @@ services:
       - ./sql-dump:/docker-entrypoint-initdb.d
     command: '--default-authentication-plugin=mysql_native_password'
 
+  redis:
+    container_name: redis
+    image: redis:latest
+    restart: unless-stopped
+    ports:
+      - "6379:6379"

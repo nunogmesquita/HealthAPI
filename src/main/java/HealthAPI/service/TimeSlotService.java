@@ -22,22 +22,19 @@ import java.util.*;
 public class TimeSlotService {
 
     private final TimeSlotRepository timeSlotRepository;
-    private final AppointmentService appointmentService;
     private final UserConverter userConverter;
     private final TimeSlotConverter timeSlotConverter;
 
     @Autowired
-    public TimeSlotService(TimeSlotRepository timeSlotRepository, AppointmentService appointmentService,
-                           UserConverter userConverter, TimeSlotConverter timeSlotConverter) {
+    public TimeSlotService(TimeSlotRepository timeSlotRepository, UserConverter userConverter, TimeSlotConverter timeSlotConverter) {
         this.timeSlotRepository = timeSlotRepository;
-        this.appointmentService = appointmentService;
         this.userConverter = userConverter;
         this.timeSlotConverter = timeSlotConverter;
     }
 
     public void generateWeeklyTimeSlots(WeeklyTimeSlotDto weeklyTimeSlotDto, UserDto userDto) {
-        LocalDateTime startDateTime = LocalDateTime.of(weeklyTimeSlotDto.getDate(), LocalTime.MIN);
-        LocalDateTime endDateTime = LocalDateTime.of(weeklyTimeSlotDto.getDate(), LocalTime.MAX);
+        LocalDate startDate = weeklyTimeSlotDto.getDate().withDayOfMonth(1);
+        LocalDate endDate = startDate.plusMonths(1).minusDays(1);
         List<LocalTimeRange> excludedRanges = new ArrayList<>();
         if (weeklyTimeSlotDto.getExcludedTimeRanges() != null) {
             for (String range : weeklyTimeSlotDto.getExcludedTimeRanges()) {
@@ -47,8 +44,8 @@ public class TimeSlotService {
         }
         List<TimeSlot> timeSlots = new ArrayList<>();
         for (DayOfWeek dayOfWeek : weeklyTimeSlotDto.getDayOfWeeks()) {
-            LocalDate currentDate = startDateTime.toLocalDate().with(TemporalAdjusters.nextOrSame(dayOfWeek));
-            while (currentDate.isBefore(endDateTime.toLocalDate())) {
+            LocalDate currentDate = startDate.with(TemporalAdjusters.nextOrSame(dayOfWeek));
+            while (currentDate.isBefore(endDate.plusDays(1))) {
                 LocalDateTime currentDateTime = LocalDateTime.of(currentDate, weeklyTimeSlotDto.getInitialHour());
                 while (currentDateTime.plus(Duration.ofHours(1)).isBefore(LocalDateTime.of(currentDate, weeklyTimeSlotDto.getFinishingHour()))) {
                     boolean excluded = false;
@@ -77,6 +74,7 @@ public class TimeSlotService {
             timeSlotRepository.save(timeSlot);
         }
     }
+
 
     public List<TimeSlotDto> getAvailableTimeSlots(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);

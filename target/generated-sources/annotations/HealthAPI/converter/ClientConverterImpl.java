@@ -1,9 +1,13 @@
 package HealthAPI.converter;
 
+import HealthAPI.dto.AddressDto;
+import HealthAPI.dto.AddressDto.AddressDtoBuilder;
 import HealthAPI.dto.Client.ClientCreateDto;
 import HealthAPI.dto.Client.ClientCreateDto.ClientCreateDtoBuilder;
 import HealthAPI.dto.Client.ClientDto;
 import HealthAPI.dto.Client.ClientDto.ClientDtoBuilder;
+import HealthAPI.model.Address;
+import HealthAPI.model.Address.AddressBuilder;
 import HealthAPI.model.Client;
 import HealthAPI.model.Client.ClientBuilder;
 import javax.annotation.processing.Generated;
@@ -11,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-03-27T09:58:53+0100",
+    date = "2023-03-27T15:48:01+0100",
     comments = "version: 1.4.1.Final, compiler: javac, environment: Java 19.0.1 (Oracle Corporation)"
 )
 @Component
@@ -32,7 +36,7 @@ public class ClientConverterImpl implements ClientConverter {
         client.birthDate( clientCreateDto.getBirthDate() );
         client.gender( clientCreateDto.getGender() );
         client.NIF( clientCreateDto.getNIF() );
-        client.address( clientCreateDto.getAddress() );
+        client.address( addressDtoToAddress( clientCreateDto.getAddress() ) );
 
         return client.build();
     }
@@ -52,7 +56,7 @@ public class ClientConverterImpl implements ClientConverter {
         clientCreateDto.birthDate( client.getBirthDate() );
         clientCreateDto.gender( client.getGender() );
         clientCreateDto.NIF( client.getNIF() );
-        clientCreateDto.address( client.getAddress() );
+        clientCreateDto.address( addressToAddressDto( client.getAddress() ) );
 
         return clientCreateDto.build();
     }
@@ -72,7 +76,7 @@ public class ClientConverterImpl implements ClientConverter {
         client.birthDate( clientDto.getBirthDate() );
         client.gender( clientDto.getGender() );
         client.NIF( clientDto.getNIF() );
-        client.address( clientDto.getAddress() );
+        client.address( addressDtoToAddress( clientDto.getAddress() ) );
 
         return client.build();
     }
@@ -92,8 +96,36 @@ public class ClientConverterImpl implements ClientConverter {
         clientDto.birthDate( client.getBirthDate() );
         clientDto.gender( client.getGender() );
         clientDto.NIF( client.getNIF() );
-        clientDto.address( client.getAddress() );
+        clientDto.address( addressToAddressDto( client.getAddress() ) );
 
         return clientDto.build();
+    }
+
+    protected Address addressDtoToAddress(AddressDto addressDto) {
+        if ( addressDto == null ) {
+            return null;
+        }
+
+        AddressBuilder address = Address.builder();
+
+        address.street( addressDto.getStreet() );
+        address.city( addressDto.getCity() );
+        address.zipCode( addressDto.getZipCode() );
+
+        return address.build();
+    }
+
+    protected AddressDto addressToAddressDto(Address address) {
+        if ( address == null ) {
+            return null;
+        }
+
+        AddressDtoBuilder addressDto = AddressDto.builder();
+
+        addressDto.street( address.getStreet() );
+        addressDto.city( address.getCity() );
+        addressDto.zipCode( address.getZipCode() );
+
+        return addressDto.build();
     }
 }

@@ -7,6 +7,7 @@ import HealthAPI.dto.Client.ClientDto;
 import HealthAPI.model.Client;
 import HealthAPI.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,6 +37,7 @@ public class ClientService {
         clientRepository.save(client);
     }
 
+    @Cacheable(value = "clientsCache")
     public List<ClientDto> getAllClients() {
         List<Client> clients = clientRepository.findByDeleted(false);
         return clients.parallelStream()
@@ -57,6 +59,7 @@ public class ClientService {
         return clientConverter.fromClientToClientDto(client);
     }
 
+    @Cacheable(value = "clientCache")
     public Client getClientById(Long id) {
         return clientRepository.findById(id)
                 .orElseThrow();
