@@ -24,4 +24,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByDeletedTrue();
 
     Optional<User> findByIdAndDeletedFalse(Long id);
+
+    List<User> findByRoleAndDeleted(Role healthcareprovider, boolean deleted);
 }

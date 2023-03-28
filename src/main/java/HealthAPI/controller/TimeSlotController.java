@@ -30,12 +30,15 @@ public class TimeSlotController {
         this.userService = userService;
     }
 
-    @PatchMapping("/create")
-    public ResponseEntity<String> generateWeeklyTimeSlots(@NonNull HttpServletRequest request,
-                                                          @RequestBody WeeklyTimeSlotDto weeklyTimeSlotDto) {
-        String jwt = request.getHeader("Authorization").substring(7);
-        UserDto userDto = userService.getUserByToken(jwt);
-        timeSlotService.generateWeeklyTimeSlots(weeklyTimeSlotDto, userDto);
+    @PostMapping("/create/weekly")
+    public ResponseEntity<String> generateWeeklyTimeSlots(@RequestBody WeeklyTimeSlotDto weeklyTimeSlotDto) {
+        timeSlotService.generateWeeklyTimeSlots(weeklyTimeSlotDto);
+        return new ResponseEntity<>(Responses.TIMESLOTS_CREATED, HttpStatus.OK);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<String> generateTimeSlot(@RequestBody WeeklyTimeSlotDto weeklyTimeSlotDto) {
+        timeSlotService.generateWeeklyTimeSlots(weeklyTimeSlotDto);
         return new ResponseEntity<>(Responses.TIMESLOTS_CREATED, HttpStatus.OK);
     }
 

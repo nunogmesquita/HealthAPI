@@ -18,6 +18,6 @@ public class ProfessionalDto {
 
     private String lastName;
 
-    private Speciality speciality;
+    private String speciality;
 
 }

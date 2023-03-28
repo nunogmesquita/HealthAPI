@@ -31,4 +31,7 @@ public class WeeklyTimeSlotDto {
 
     List<String> excludedTimeRanges;
 
+    @NotBlank
+    Long userId;
+
 }

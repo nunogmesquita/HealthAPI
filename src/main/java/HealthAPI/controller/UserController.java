@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
@@ -31,26 +31,26 @@ public class UserController {
         this.userConverter = userConverter;
     }
 
-    @GetMapping("/all")
+    @GetMapping("/viewprofiles")
     public ResponseEntity<List<UserDto>> getAllUsers() {
         List<UserDto> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
-    @GetMapping("/allInactive")
+    @GetMapping("/viewinactiveprofiles")
     public ResponseEntity<List<UserDto>> getAllDeletedUsers() {
         List<UserDto> users = userService.getAllDeletedUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/viewprofile/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
         User user = userService.getUserById(id);
         UserDto userDto = userConverter.fromUserToUserDto(user);
         return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
 
-    @GetMapping("/myAccount")
+    @GetMapping("/myaccount")
     public ResponseEntity<UserDto> getMyAccount(@NonNull HttpServletRequest request) {
         String jwt = request.getHeader("Authorization").substring(7);
         UserDto userDto = userService.getUserByToken(jwt);
@@ -70,13 +70,13 @@ public class UserController {
         return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/editprofile/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @Valid @RequestBody UserCreateDto userCreateDto) {
         UserDto user = userService.updateUser(id, userCreateDto);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
-    @PatchMapping("/myAccount")
+    @PatchMapping("/myaccount")
     public ResponseEntity<UserDto> updateMyAccount(@NonNull HttpServletRequest request, @Valid @RequestBody UserCreateDto userCreateDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
 

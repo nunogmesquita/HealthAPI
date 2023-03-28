@@ -1,5 +1,6 @@
 package HealthAPI.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
@@ -13,7 +14,9 @@ public class AddressDto {
 
     String city;
 
-    @Pattern(regexp = "^\\d{4}(-\\d{3})?$", message = "Please insert a valid zipcode.")
+    @NotBlank(message = "Must have a zip code")
+    @Pattern(regexp = "^\\d{4}(-\\d{3})?$",
+            message = "Please insert a valid zipcode.")
     String zipCode;
 
 }

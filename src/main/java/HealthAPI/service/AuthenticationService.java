@@ -3,15 +3,16 @@ package HealthAPI.service;
 import HealthAPI.converter.ClientConverter;
 import HealthAPI.dto.AuthenticationRequest;
 import HealthAPI.dto.AuthenticationResponse;
-import HealthAPI.dto.Client.ClientCreateDto;
+import HealthAPI.dto.RegisterRequest;
+import HealthAPI.exception.NotOldEnough;
 import HealthAPI.model.*;
 import HealthAPI.repository.ClientRepository;
 import HealthAPI.repository.TokenRepository;
 import HealthAPI.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -26,25 +27,32 @@ public class AuthenticationService {
     private final ClientConverter clientConverter;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final AddressService addressService;
+    private final PasswordEncoder passwordEncoder;
+
 
     @Autowired
     public AuthenticationService(UserRepository userRepository, ClientRepository clientRepository,
                                  TokenRepository tokenRepository, ClientConverter clientConverter,
-                                 JwtService jwtService, AuthenticationManager authenticationManager) {
+                                 JwtService jwtService, AuthenticationManager authenticationManager, AddressService addressService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.clientRepository = clientRepository;
         this.tokenRepository = tokenRepository;
         this.clientConverter = clientConverter;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
+        this.addressService = addressService;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    public AuthenticationResponse register(ClientCreateDto request) {
+    public AuthenticationResponse register(RegisterRequest request) {
         if (Period.between(request.getBirthDate(), LocalDate.now()).getYears() < 18) {
-            ResponseEntity.badRequest().body("You must have at least 18 years old.");
-            return null;
+            throw new NotOldEnough();
         }
-        Client client = clientConverter.fromClientCreateDtoToClient(request);
+        Address address = addressService.saveAddress(request.getAddress());
+        Client client = clientConverter.fromAuthenticationRequestToClient(request);
+        client.setPassword(passwordEncoder.encode(request.getPassword()));
+        client.setAddress(address);
         clientRepository.save(client);
         String jwtToken = jwtService.generateToken(client, client.getId());
         saveClientToken(client, jwtToken);

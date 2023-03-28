@@ -5,10 +5,10 @@ import HealthAPI.converter.UserConverter;
 import HealthAPI.dto.TimeSlot.TimeSlotDto;
 import HealthAPI.dto.TimeSlot.TimeSlotUpdateDto;
 import HealthAPI.dto.TimeSlot.WeeklyTimeSlotDto;
-import HealthAPI.dto.User.UserDto;
-import HealthAPI.exceptions.ResourceNotFoundException;
+import HealthAPI.exception.ResourceNotFoundException;
 import HealthAPI.model.*;
 import HealthAPI.repository.TimeSlotRepository;
+import HealthAPI.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,22 +22,23 @@ import java.util.*;
 public class TimeSlotService {
 
     private final TimeSlotRepository timeSlotRepository;
-    private final AppointmentService appointmentService;
     private final UserConverter userConverter;
     private final TimeSlotConverter timeSlotConverter;
+    private final UserRepository userRepository;
 
     @Autowired
-    public TimeSlotService(TimeSlotRepository timeSlotRepository, AppointmentService appointmentService,
-                           UserConverter userConverter, TimeSlotConverter timeSlotConverter) {
+    public TimeSlotService(TimeSlotRepository timeSlotRepository, UserConverter userConverter,
+                           TimeSlotConverter timeSlotConverter, UserRepository userRepository) {
         this.timeSlotRepository = timeSlotRepository;
-        this.appointmentService = appointmentService;
         this.userConverter = userConverter;
         this.timeSlotConverter = timeSlotConverter;
+        this.userRepository = userRepository;
     }
 
-    public void generateWeeklyTimeSlots(WeeklyTimeSlotDto weeklyTimeSlotDto, UserDto userDto) {
-        LocalDateTime startDateTime = LocalDateTime.of(weeklyTimeSlotDto.getDate(), LocalTime.MIN);
-        LocalDateTime endDateTime = LocalDateTime.of(weeklyTimeSlotDto.getDate(), LocalTime.MAX);
+    public void generateWeeklyTimeSlots(WeeklyTimeSlotDto weeklyTimeSlotDto) {
+        User user = userRepository.findById(weeklyTimeSlotDto.getUserId()).orElseThrow();
+        LocalDate startDate = weeklyTimeSlotDto.getDate().withDayOfMonth(1);
+        LocalDate endDate = startDate.plusMonths(1).minusDays(1);
         List<LocalTimeRange> excludedRanges = new ArrayList<>();
         if (weeklyTimeSlotDto.getExcludedTimeRanges() != null) {
             for (String range : weeklyTimeSlotDto.getExcludedTimeRanges()) {
@@ -47,8 +48,8 @@ public class TimeSlotService {
         }
         List<TimeSlot> timeSlots = new ArrayList<>();
         for (DayOfWeek dayOfWeek : weeklyTimeSlotDto.getDayOfWeeks()) {
-            LocalDate currentDate = startDateTime.toLocalDate().with(TemporalAdjusters.nextOrSame(dayOfWeek));
-            while (currentDate.isBefore(endDateTime.toLocalDate())) {
+            LocalDate currentDate = startDate.with(TemporalAdjusters.nextOrSame(dayOfWeek));
+            while (currentDate.isBefore(endDate.plusDays(1))) {
                 LocalDateTime currentDateTime = LocalDateTime.of(currentDate, weeklyTimeSlotDto.getInitialHour());
                 while (currentDateTime.plus(Duration.ofHours(1)).isBefore(LocalDateTime.of(currentDate, weeklyTimeSlotDto.getFinishingHour()))) {
                     boolean excluded = false;
@@ -65,7 +66,7 @@ public class TimeSlotService {
                                 .dayOfWeek(dayOfWeek)
                                 .month(currentDate.getMonthValue())
                                 .year(currentDate.getYear())
-                                .user(userConverter.fromUserDtoToUser(userDto))
+                                .user(user)
                                 .build());
                     }
                     currentDateTime = currentDateTime.plus(Duration.ofHours(1));
@@ -77,6 +78,7 @@ public class TimeSlotService {
             timeSlotRepository.save(timeSlot);
         }
     }
+
 
     public List<TimeSlotDto> getAvailableTimeSlots(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);

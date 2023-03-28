@@ -35,7 +35,7 @@ public class UserService {
     }
 
     public List<ProfessionalDto> getAllProfessionals() {
-        List<User> users = userRepository.findByRole(HEALTHCAREPROVIDER);
+        List<User> users = userRepository.findByRoleAndDeleted(HEALTHCAREPROVIDER, false);
         return users.parallelStream()
                 .map(userConverter::fromUserToProfessionalDto)
                 .toList();
@@ -72,7 +72,7 @@ public class UserService {
     public List<String> getAllServices() {
         List<String> services = new ArrayList<>();
         for (Speciality speciality : Speciality.values()) {
-            services.add(speciality.name);
+            services.add(speciality.toString());
         }
         return services;
     }
