@@ -5,10 +5,10 @@ import HealthAPI.converter.UserConverter;
 import HealthAPI.dto.TimeSlot.TimeSlotDto;
 import HealthAPI.dto.TimeSlot.TimeSlotUpdateDto;
 import HealthAPI.dto.TimeSlot.WeeklyTimeSlotDto;
-import HealthAPI.dto.User.UserDto;
-import HealthAPI.exceptions.ResourceNotFoundException;
+import HealthAPI.exception.ResourceNotFoundException;
 import HealthAPI.model.*;
 import HealthAPI.repository.TimeSlotRepository;
+import HealthAPI.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,15 +24,19 @@ public class TimeSlotService {
     private final TimeSlotRepository timeSlotRepository;
     private final UserConverter userConverter;
     private final TimeSlotConverter timeSlotConverter;
+    private final UserRepository userRepository;
 
     @Autowired
-    public TimeSlotService(TimeSlotRepository timeSlotRepository, UserConverter userConverter, TimeSlotConverter timeSlotConverter) {
+    public TimeSlotService(TimeSlotRepository timeSlotRepository, UserConverter userConverter,
+                           TimeSlotConverter timeSlotConverter, UserRepository userRepository) {
         this.timeSlotRepository = timeSlotRepository;
         this.userConverter = userConverter;
         this.timeSlotConverter = timeSlotConverter;
+        this.userRepository = userRepository;
     }
 
-    public void generateWeeklyTimeSlots(WeeklyTimeSlotDto weeklyTimeSlotDto, UserDto userDto) {
+    public void generateWeeklyTimeSlots(WeeklyTimeSlotDto weeklyTimeSlotDto) {
+        User user = userRepository.findById(weeklyTimeSlotDto.getUserId()).orElseThrow();
         LocalDate startDate = weeklyTimeSlotDto.getDate().withDayOfMonth(1);
         LocalDate endDate = startDate.plusMonths(1).minusDays(1);
         List<LocalTimeRange> excludedRanges = new ArrayList<>();
@@ -62,7 +66,7 @@ public class TimeSlotService {
                                 .dayOfWeek(dayOfWeek)
                                 .month(currentDate.getMonthValue())
                                 .year(currentDate.getYear())
-                                .user(userConverter.fromUserDtoToUser(userDto))
+                                .user(user)
                                 .build());
                     }
                     currentDateTime = currentDateTime.plus(Duration.ofHours(1));

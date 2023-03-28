@@ -1,7 +1,7 @@
 package HealthAPI.controller;
 
-import HealthAPI.dto.Client.ClientCreateDto;
 import HealthAPI.dto.Client.ClientDto;
+import HealthAPI.dto.RegisterRequest;
 import HealthAPI.messages.Responses;
 import HealthAPI.service.ClientService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/client")
+@RequestMapping("/clients")
 public class ClientController {
 
     private final ClientService clientService;
@@ -34,14 +34,20 @@ public class ClientController {
         return new ResponseEntity<>(clientDto, HttpStatus.OK);
     }
 
-    @GetMapping("/getAll")
+    @GetMapping("/list")
     public ResponseEntity<List<ClientDto>> getAllClients() {
         List<ClientDto> clients = clientService.getAllClients();
         return new ResponseEntity<>(clients, HttpStatus.OK);
     }
 
-    @PatchMapping("/myAccount")
-    public ResponseEntity<ClientDto> updateMyAccount(@NonNull HttpServletRequest request, @Valid @RequestBody ClientCreateDto clientCreateDto, BindingResult bindingResult) {
+    @GetMapping("/view/{id}")
+    public ResponseEntity<ClientDto> getClient(@PathVariable Long id) {
+        ClientDto client = clientService.getClientById(id);
+        return new ResponseEntity<>(client, HttpStatus.OK);
+    }
+
+    @PatchMapping("/myaccount")
+    public ResponseEntity<ClientDto> updateMyAccount(@NonNull HttpServletRequest request, @Valid @RequestBody RegisterRequest registerRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<FieldError> errors = bindingResult.getFieldErrors();
             for (FieldError error : errors) {
@@ -50,11 +56,11 @@ public class ClientController {
         }
         String jwt = request.getHeader("Authorization").substring(7);
         ClientDto client = clientService.getClientByToken(jwt);
-        ClientDto updatedClient = clientService.updateClient(client.getId(), clientCreateDto);
+        ClientDto updatedClient = clientService.updateClient(client.getId(), registerRequest);
         return new ResponseEntity<>(updatedClient, HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteAccount(@PathVariable Long id) {
         clientService.deleteClient(id);
         return new ResponseEntity<>(Responses.DELETED_CLIENT.formatted(id), HttpStatus.OK);

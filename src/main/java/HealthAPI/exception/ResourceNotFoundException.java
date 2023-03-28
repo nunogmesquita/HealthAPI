@@ -1,4 +1,4 @@
-package HealthAPI.exceptions;
+package HealthAPI.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
 

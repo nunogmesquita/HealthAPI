@@ -27,7 +27,7 @@ public class ClientDto {
 
     private Gender gender;
 
-    private int NIF;
+    private Long NIF;
 
     private AddressDto address;
 

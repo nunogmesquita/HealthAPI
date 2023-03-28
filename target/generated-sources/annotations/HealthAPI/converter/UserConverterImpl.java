@@ -6,6 +6,7 @@ import HealthAPI.dto.User.UserCreateDto;
 import HealthAPI.dto.User.UserCreateDto.UserCreateDtoBuilder;
 import HealthAPI.dto.User.UserDto;
 import HealthAPI.dto.User.UserDto.UserDtoBuilder;
+import HealthAPI.model.Speciality;
 import HealthAPI.model.User;
 import HealthAPI.model.User.UserBuilder;
 import javax.annotation.processing.Generated;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-03-27T15:48:00+0100",
+    date = "2023-03-28T16:57:08+0100",
     comments = "version: 1.4.1.Final, compiler: javac, environment: Java 19.0.1 (Oracle Corporation)"
 )
 @Component
@@ -98,7 +99,9 @@ public class UserConverterImpl implements UserConverter {
         user.id( professionalDto.getId() );
         user.firstName( professionalDto.getFirstName() );
         user.lastName( professionalDto.getLastName() );
-        user.speciality( professionalDto.getSpeciality() );
+        if ( professionalDto.getSpeciality() != null ) {
+            user.speciality( Enum.valueOf( Speciality.class, professionalDto.getSpeciality() ) );
+        }
 
         return user.build();
     }
@@ -114,7 +117,9 @@ public class UserConverterImpl implements UserConverter {
         professionalDto.id( user.getId() );
         professionalDto.firstName( user.getFirstName() );
         professionalDto.lastName( user.getLastName() );
-        professionalDto.speciality( user.getSpeciality() );
+        if ( user.getSpeciality() != null ) {
+            professionalDto.speciality( user.getSpeciality().name() );
+        }
 
         return professionalDto.build();
     }

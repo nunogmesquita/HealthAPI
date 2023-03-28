@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/appointment")
+@RequestMapping("/appointments")
 public class AppointmentController {
 
     private final UserService userService;
@@ -33,7 +33,7 @@ public class AppointmentController {
         this.appointmentService = appointmentService;
     }
 
-    @PostMapping("/create")
+    @PostMapping("/register")
     public ResponseEntity<AppointmentDto> createAppointment(@RequestBody AppointmentCreateDto appointmentCreateDto) {
         AppointmentDto appointmentDto = appointmentService.createAppointment(appointmentCreateDto);
         return new ResponseEntity<>(appointmentDto, HttpStatus.OK);
@@ -57,14 +57,14 @@ public class AppointmentController {
         return new ResponseEntity<>(appointmentDto, HttpStatus.OK);
     }
 
-    @GetMapping("/getAllByClientId")
-    public ResponseEntity<List<AppointmentDto>> getAllAppointmentByClientId(@RequestParam Long clientId) {
+    @GetMapping("/listbyclient/{id}")
+    public ResponseEntity<List<AppointmentDto>> getAllAppointmentByClientId(@PathVariable Long clientId) {
         List<AppointmentDto> appointmentList = appointmentService.findAllByClientId(clientId);
         return new ResponseEntity<>(appointmentList, HttpStatus.OK);
     }
 
-    @GetMapping("/getAllByUserId")
-    public ResponseEntity<List<AppointmentDto>> getAllAppointmentByUserId(@RequestParam Long userId) {
+    @GetMapping("/listbyuser/{id}")
+    public ResponseEntity<List<AppointmentDto>> getAllAppointmentByUserId(@PathVariable Long userId) {
         List<AppointmentDto> appointmentList = appointmentService.findAllByUserId(userId);
         return new ResponseEntity<>(appointmentList, HttpStatus.OK);
     }

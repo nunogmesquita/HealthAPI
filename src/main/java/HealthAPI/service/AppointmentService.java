@@ -1,8 +1,10 @@
 package HealthAPI.service;
 
 import HealthAPI.converter.AppointmentConverter;
+import HealthAPI.converter.ClientConverter;
 import HealthAPI.dto.AppointmentCreateDto;
 import HealthAPI.dto.AppointmentDto;
+import HealthAPI.dto.Client.ClientDto;
 import HealthAPI.model.*;
 import HealthAPI.repository.AppointmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,24 +20,28 @@ public class AppointmentService {
     private final ClientService clientService;
     private final TimeSlotService timeSlotService;
     private final AppointmentConverter appointmentConverter;
+    private final ClientConverter clientConverter;
 
     @Autowired
-    public AppointmentService(AppointmentRepository appointmentRepository, UserService userService, ClientService clientService, TimeSlotService timeSlotService, AppointmentConverter appointmentConverter) {
+    public AppointmentService(AppointmentRepository appointmentRepository, UserService userService,
+                              ClientService clientService, TimeSlotService timeSlotService,
+                              AppointmentConverter appointmentConverter, ClientConverter clientConverter) {
         this.appointmentRepository = appointmentRepository;
         this.userService = userService;
         this.clientService = clientService;
         this.timeSlotService = timeSlotService;
         this.appointmentConverter = appointmentConverter;
+        this.clientConverter = clientConverter;
     }
 
     public AppointmentDto createAppointment(AppointmentCreateDto appointmentCreateDto) {
         User user = userService.getUserById(appointmentCreateDto.getUserId());
         TimeSlot timeSlot = timeSlotService.getTimeSlotById(appointmentCreateDto.getTimeSlotId());
-        Client client = clientService.getClientById(appointmentCreateDto.getClientId());
+        ClientDto client = clientService.getClientById(appointmentCreateDto.getClientId());
         Appointment appointment = Appointment.builder()
                 .user(user)
                 .timeSlot(timeSlot)
-                .client(client)
+                .client(clientConverter.fromClientDtoToClient(client))
                 .build();
         appointmentRepository.save(appointment);
         return appointmentConverter.fromAppointmentToAppointmentDto(appointment);

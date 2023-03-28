@@ -2,10 +2,9 @@ package HealthAPI.converter;
 
 import HealthAPI.dto.AddressDto;
 import HealthAPI.dto.AddressDto.AddressDtoBuilder;
-import HealthAPI.dto.Client.ClientCreateDto;
-import HealthAPI.dto.Client.ClientCreateDto.ClientCreateDtoBuilder;
 import HealthAPI.dto.Client.ClientDto;
 import HealthAPI.dto.Client.ClientDto.ClientDtoBuilder;
+import HealthAPI.dto.RegisterRequest;
 import HealthAPI.model.Address;
 import HealthAPI.model.Address.AddressBuilder;
 import HealthAPI.model.Client;
@@ -15,51 +14,11 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-03-27T15:48:01+0100",
+    date = "2023-03-28T16:57:08+0100",
     comments = "version: 1.4.1.Final, compiler: javac, environment: Java 19.0.1 (Oracle Corporation)"
 )
 @Component
 public class ClientConverterImpl implements ClientConverter {
-
-    @Override
-    public Client fromClientCreateDtoToClient(ClientCreateDto clientCreateDto) {
-        if ( clientCreateDto == null ) {
-            return null;
-        }
-
-        ClientBuilder client = Client.builder();
-
-        client.fullName( clientCreateDto.getFullName() );
-        client.phoneNumber( clientCreateDto.getPhoneNumber() );
-        client.email( clientCreateDto.getEmail() );
-        client.password( clientCreateDto.getPassword() );
-        client.birthDate( clientCreateDto.getBirthDate() );
-        client.gender( clientCreateDto.getGender() );
-        client.NIF( clientCreateDto.getNIF() );
-        client.address( addressDtoToAddress( clientCreateDto.getAddress() ) );
-
-        return client.build();
-    }
-
-    @Override
-    public ClientCreateDto fromClientToClientCreateDto(Client client) {
-        if ( client == null ) {
-            return null;
-        }
-
-        ClientCreateDtoBuilder clientCreateDto = ClientCreateDto.builder();
-
-        clientCreateDto.fullName( client.getFullName() );
-        clientCreateDto.phoneNumber( client.getPhoneNumber() );
-        clientCreateDto.email( client.getEmail() );
-        clientCreateDto.password( client.getPassword() );
-        clientCreateDto.birthDate( client.getBirthDate() );
-        clientCreateDto.gender( client.getGender() );
-        clientCreateDto.NIF( client.getNIF() );
-        clientCreateDto.address( addressToAddressDto( client.getAddress() ) );
-
-        return clientCreateDto.build();
-    }
 
     @Override
     public Client fromClientDtoToClient(ClientDto clientDto) {
@@ -75,7 +34,9 @@ public class ClientConverterImpl implements ClientConverter {
         client.email( clientDto.getEmail() );
         client.birthDate( clientDto.getBirthDate() );
         client.gender( clientDto.getGender() );
-        client.NIF( clientDto.getNIF() );
+        if ( clientDto.getNIF() != null ) {
+            client.NIF( clientDto.getNIF().intValue() );
+        }
         client.address( addressDtoToAddress( clientDto.getAddress() ) );
 
         return client.build();
@@ -95,10 +56,30 @@ public class ClientConverterImpl implements ClientConverter {
         clientDto.email( client.getEmail() );
         clientDto.birthDate( client.getBirthDate() );
         clientDto.gender( client.getGender() );
-        clientDto.NIF( client.getNIF() );
+        clientDto.NIF( (long) client.getNIF() );
         clientDto.address( addressToAddressDto( client.getAddress() ) );
 
         return clientDto.build();
+    }
+
+    @Override
+    public Client fromAuthenticationRequestToClient(RegisterRequest request) {
+        if ( request == null ) {
+            return null;
+        }
+
+        ClientBuilder client = Client.builder();
+
+        client.fullName( request.getFullName() );
+        client.phoneNumber( request.getPhoneNumber() );
+        client.email( request.getEmail() );
+        client.password( request.getPassword() );
+        client.birthDate( request.getBirthDate() );
+        client.gender( request.getGender() );
+        client.NIF( request.getNIF() );
+        client.address( addressDtoToAddress( request.getAddress() ) );
+
+        return client.build();
     }
 
     protected Address addressDtoToAddress(AddressDto addressDto) {

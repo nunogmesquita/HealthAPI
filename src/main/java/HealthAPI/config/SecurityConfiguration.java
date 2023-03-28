@@ -22,19 +22,18 @@ public class SecurityConfiguration {
     private final LogoutHandler logoutHandler;
 
 
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/auth", "/v3/**", "/swagger-ui/**","/services","/", "/professionals")
-                .permitAll()
-                /*.requestMatchers("/**")
-                    .hasAuthority("ADMIN")
-                .requestMatchers("/user/**")
-                    .hasAuthority("USER")*/
+                .requestMatchers("/v3/**", "/swagger-ui/**", "/home/**")
+                    .permitAll()
+                .requestMatchers("/auth/**")
+                    .permitAll()
+                .requestMatchers("/**")
+                    .permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()

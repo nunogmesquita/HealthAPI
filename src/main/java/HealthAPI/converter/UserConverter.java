@@ -5,6 +5,7 @@ import HealthAPI.dto.User.UserCreateDto;
 import HealthAPI.dto.User.UserDto;
 import HealthAPI.model.User;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper
 public interface UserConverter {

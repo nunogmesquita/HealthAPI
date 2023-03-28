@@ -3,7 +3,9 @@ package HealthAPI.service;
 import HealthAPI.converter.ClientConverter;
 import HealthAPI.dto.AuthenticationRequest;
 import HealthAPI.dto.AuthenticationResponse;
-import HealthAPI.dto.Client.ClientCreateDto;
+import HealthAPI.dto.RegisterRequest;
+import HealthAPI.exception.NotOldEnough;
+import HealthAPI.messages.Responses;
 import HealthAPI.model.*;
 import HealthAPI.repository.ClientRepository;
 import HealthAPI.repository.TokenRepository;
@@ -26,25 +28,28 @@ public class AuthenticationService {
     private final ClientConverter clientConverter;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final AddressService addressService;
 
     @Autowired
     public AuthenticationService(UserRepository userRepository, ClientRepository clientRepository,
                                  TokenRepository tokenRepository, ClientConverter clientConverter,
-                                 JwtService jwtService, AuthenticationManager authenticationManager) {
+                                 JwtService jwtService, AuthenticationManager authenticationManager, AddressService addressService) {
         this.userRepository = userRepository;
         this.clientRepository = clientRepository;
         this.tokenRepository = tokenRepository;
         this.clientConverter = clientConverter;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
+        this.addressService = addressService;
     }
 
-    public AuthenticationResponse register(ClientCreateDto request) {
+    public AuthenticationResponse register(RegisterRequest request) {
         if (Period.between(request.getBirthDate(), LocalDate.now()).getYears() < 18) {
-            ResponseEntity.badRequest().body("You must have at least 18 years old.");
-            return null;
+            throw new NotOldEnough();
         }
-        Client client = clientConverter.fromClientCreateDtoToClient(request);
+        Address address = addressService.saveAddress(request.getAddress());
+        Client client = clientConverter.fromAuthenticationRequestToClient(request);
+        client.setAddress(address);
         clientRepository.save(client);
         String jwtToken = jwtService.generateToken(client, client.getId());
         saveClientToken(client, jwtToken);

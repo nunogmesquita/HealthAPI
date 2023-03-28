@@ -2,8 +2,8 @@ package HealthAPI.service;
 
 import HealthAPI.converter.AddressConverter;
 import HealthAPI.converter.ClientConverter;
-import HealthAPI.dto.Client.ClientCreateDto;
 import HealthAPI.dto.Client.ClientDto;
+import HealthAPI.dto.RegisterRequest;
 import HealthAPI.model.Client;
 import HealthAPI.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,6 @@ public class ClientService {
         clientRepository.save(client);
     }
 
-    @Cacheable(value = "clientsCache")
     public List<ClientDto> getAllClients() {
         List<Client> clients = clientRepository.findByDeleted(false);
         return clients.parallelStream()
@@ -45,24 +44,25 @@ public class ClientService {
                 .toList();
     }
 
-    public ClientDto updateClient(Long id, ClientCreateDto clientCreateDto) {
+    public ClientDto updateClient(Long id, RegisterRequest registerRequest) {
         Client client = clientRepository.getReferenceById(id);
-        client.setFullName(clientCreateDto.getFullName());
-        client.setPhoneNumber(clientCreateDto.getPhoneNumber());
-        client.setEmail(clientCreateDto.getEmail());
-        client.setPassword(clientCreateDto.getPassword());
-        client.setBirthDate(clientCreateDto.getBirthDate());
-        client.setGender(clientCreateDto.getGender());
-        client.setNIF(clientCreateDto.getNIF());
-        client.setAddress(addressConverter.fromAddressDtoToAddress(clientCreateDto.getAddress()));
+        client.setFullName(registerRequest.getFullName());
+        client.setPhoneNumber(registerRequest.getPhoneNumber());
+        client.setEmail(registerRequest.getEmail());
+        client.setPassword(registerRequest.getPassword());
+        client.setBirthDate(registerRequest.getBirthDate());
+        client.setGender(registerRequest.getGender());
+        client.setNIF(registerRequest.getNIF());
+        client.setAddress(addressConverter.fromAddressDtoToAddress(registerRequest.getAddress()));
         clientRepository.save(client);
         return clientConverter.fromClientToClientDto(client);
     }
 
     @Cacheable(value = "clientCache")
-    public Client getClientById(Long id) {
-        return clientRepository.findById(id)
+    public ClientDto getClientById(Long id) {
+        Client client = clientRepository.findByIdAndDeleted(id, false)
                 .orElseThrow();
+        return clientConverter.fromClientToClientDto(client);
     }
 
 }
