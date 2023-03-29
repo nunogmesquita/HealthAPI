@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-03-28T16:57:08+0100",
+    date = "2023-03-29T10:24:57+0100",
     comments = "version: 1.4.1.Final, compiler: javac, environment: Java 19.0.1 (Oracle Corporation)"
 )
 @Component
@@ -51,10 +51,7 @@ public class TimeSlotConverterImpl implements TimeSlotConverter {
 
         timeSlot.user( timeSlotDtoToUser( timeSlotDto ) );
         timeSlot.startTime( timeSlotDto.getStartTime() );
-        timeSlot.endTime( timeSlotDto.getEndTime() );
         timeSlot.dayOfWeek( timeSlotDto.getDayOfWeek() );
-        timeSlot.month( timeSlotDto.getMonth() );
-        timeSlot.year( timeSlotDto.getYear() );
 
         return timeSlot.build();
     }
@@ -69,10 +66,7 @@ public class TimeSlotConverterImpl implements TimeSlotConverter {
 
         timeSlotDto.user( timeSlotUserFirstName( timeSlot ) );
         timeSlotDto.startTime( timeSlot.getStartTime() );
-        timeSlotDto.endTime( timeSlot.getEndTime() );
         timeSlotDto.dayOfWeek( timeSlot.getDayOfWeek() );
-        timeSlotDto.month( timeSlot.getMonth() );
-        timeSlotDto.year( timeSlot.getYear() );
 
         return timeSlotDto.build();
     }

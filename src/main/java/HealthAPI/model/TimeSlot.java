@@ -23,17 +23,8 @@ public class TimeSlot {
     @Column(nullable = false)
     private LocalDateTime startTime;
 
-    @Column(name = "end_time")
-    private LocalDateTime endTime;
-
     @Column(nullable = false)
     private DayOfWeek dayOfWeek;
-
-    @Column(nullable = false)
-    private int month;
-
-    @Column(nullable = false)
-    private int year;
 
     @ManyToOne
     private User user;
@@ -42,7 +33,5 @@ public class TimeSlot {
     private Appointment appointment;
 
     private boolean isBooked;
-
-    private boolean isBookedBySameClient;
 
 }

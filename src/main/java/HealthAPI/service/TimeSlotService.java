@@ -37,8 +37,8 @@ public class TimeSlotService {
 
     public void generateWeeklyTimeSlots(WeeklyTimeSlotDto weeklyTimeSlotDto) {
         User user = userRepository.findById(weeklyTimeSlotDto.getUserId()).orElseThrow();
-        LocalDate startDate = weeklyTimeSlotDto.getDate().withDayOfMonth(1);
-        LocalDate endDate = startDate.plusMonths(1).minusDays(1);
+        LocalDate startDate = weeklyTimeSlotDto.getDate();
+        LocalDate endDate = startDate.plusMonths(1);
         List<LocalTimeRange> excludedRanges = new ArrayList<>();
         if (weeklyTimeSlotDto.getExcludedTimeRanges() != null) {
             for (String range : weeklyTimeSlotDto.getExcludedTimeRanges()) {
@@ -49,23 +49,24 @@ public class TimeSlotService {
         List<TimeSlot> timeSlots = new ArrayList<>();
         for (DayOfWeek dayOfWeek : weeklyTimeSlotDto.getDayOfWeeks()) {
             LocalDate currentDate = startDate.with(TemporalAdjusters.nextOrSame(dayOfWeek));
-            while (currentDate.isBefore(endDate.plusDays(1))) {
+            while (currentDate.isBefore(endDate)) {
                 LocalDateTime currentDateTime = LocalDateTime.of(currentDate, weeklyTimeSlotDto.getInitialHour());
-                while (currentDateTime.plus(Duration.ofHours(1)).isBefore(LocalDateTime.of(currentDate, weeklyTimeSlotDto.getFinishingHour()))) {
+                while (currentDateTime.isBefore(LocalDateTime.of(currentDate, weeklyTimeSlotDto.getFinishingHour()))) {
                     boolean excluded = false;
                     for (LocalTimeRange range : excludedRanges) {
-                        if (range.contains(currentDateTime.toLocalTime())) {
+                        if(range.getStart().equals(currentDateTime.toLocalTime())){
                             excluded = true;
                             break;
                         }
+//                        if (range.contains(currentDateTime.toLocalTime())) {
+//                            excluded = true;
+//                            break;
+//                        }
                     }
                     if (!excluded) {
                         timeSlots.add(TimeSlot.builder()
                                 .startTime(currentDateTime)
-                                .endTime(currentDateTime.plus(Duration.ofHours(1)))
                                 .dayOfWeek(dayOfWeek)
-                                .month(currentDate.getMonthValue())
-                                .year(currentDate.getYear())
                                 .user(user)
                                 .build());
                     }
@@ -119,8 +120,6 @@ public class TimeSlotService {
 
         existingTimeSlot.setStartTime(updatedTimeSlot.getTime());
         existingTimeSlot.setDayOfWeek(updatedTimeSlot.getDayOfWeek());
-        existingTimeSlot.setMonth(updatedTimeSlot.getMonth());
-        existingTimeSlot.setYear(updatedTimeSlot.getYear());
         timeSlotRepository.save(existingTimeSlot);
         return timeSlotConverter.fromTimeSlotToTimeSlotDto(existingTimeSlot);
     }

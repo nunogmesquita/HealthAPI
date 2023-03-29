@@ -17,10 +17,6 @@ public class TimeSlotDto {
 
     private DayOfWeek dayOfWeek;
 
-    private int month;
-
-    private int year;
-
     private String user;
 
     private boolean isBooked;
