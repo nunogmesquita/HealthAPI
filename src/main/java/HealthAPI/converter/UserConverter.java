@@ -10,8 +10,6 @@ import org.mapstruct.Mapping;
 @Mapper
 public interface UserConverter {
 
-    User fromUserCreateDtoToUser(UserCreateDto userCreateDto);
-
     UserCreateDto fromUserToUserCreateDto(User user);
 
     User fromUserDtoToUser(UserDto userDto);
@@ -22,4 +20,5 @@ public interface UserConverter {
 
     ProfessionalDto fromUserToProfessionalDto(User user);
 
+    User fromUserCreateDtoToUser(UserCreateDto userCreatedDto);
 }

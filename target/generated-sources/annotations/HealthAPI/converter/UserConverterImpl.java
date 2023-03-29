@@ -14,28 +14,11 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-03-28T16:57:08+0100",
+    date = "2023-03-29T09:14:58+0100",
     comments = "version: 1.4.1.Final, compiler: javac, environment: Java 19.0.1 (Oracle Corporation)"
 )
 @Component
 public class UserConverterImpl implements UserConverter {
-
-    @Override
-    public User fromUserCreateDtoToUser(UserCreateDto userCreateDto) {
-        if ( userCreateDto == null ) {
-            return null;
-        }
-
-        UserBuilder user = User.builder();
-
-        user.firstName( userCreateDto.getFirstName() );
-        user.lastName( userCreateDto.getLastName() );
-        user.email( userCreateDto.getEmail() );
-        user.password( userCreateDto.getPassword() );
-        user.speciality( userCreateDto.getSpeciality() );
-
-        return user.build();
-    }
 
     @Override
     public UserCreateDto fromUserToUserCreateDto(User user) {
@@ -50,6 +33,7 @@ public class UserConverterImpl implements UserConverter {
         userCreateDto.email( user.getEmail() );
         userCreateDto.password( user.getPassword() );
         userCreateDto.speciality( user.getSpeciality() );
+        userCreateDto.role( user.getRole() );
 
         return userCreateDto.build();
     }
@@ -122,5 +106,23 @@ public class UserConverterImpl implements UserConverter {
         }
 
         return professionalDto.build();
+    }
+
+    @Override
+    public User fromUserCreateDtoToUser(UserCreateDto userCreatedDto) {
+        if ( userCreatedDto == null ) {
+            return null;
+        }
+
+        UserBuilder user = User.builder();
+
+        user.firstName( userCreatedDto.getFirstName() );
+        user.lastName( userCreatedDto.getLastName() );
+        user.email( userCreatedDto.getEmail() );
+        user.password( userCreatedDto.getPassword() );
+        user.speciality( userCreatedDto.getSpeciality() );
+        user.role( userCreatedDto.getRole() );
+
+        return user.build();
     }
 }

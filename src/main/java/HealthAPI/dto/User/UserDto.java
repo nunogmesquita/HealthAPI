@@ -1,6 +1,7 @@
 package HealthAPI.dto.User;
 
 import HealthAPI.model.Speciality;
+import jakarta.annotation.Nullable;
 import lombok.*;
 
 @Builder
@@ -17,6 +18,7 @@ public class UserDto {
 
     private String email;
 
+    @Nullable
     private Speciality speciality;
 
 }

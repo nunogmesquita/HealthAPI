@@ -37,8 +37,8 @@ public class User implements UserDetails, Serializable {
     @Column(nullable = false)
     String password;
 
-    @Nullable
     @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
     private Speciality speciality;
 
     @Enumerated (EnumType.STRING)
