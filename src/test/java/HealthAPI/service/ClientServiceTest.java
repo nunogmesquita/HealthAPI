@@ -1,13 +1,8 @@
 package HealthAPI.service;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,19 +11,13 @@ import HealthAPI.converter.ClientConverter;
 import HealthAPI.dto.client.AddressDto;
 import HealthAPI.dto.client.ClientDto;
 import HealthAPI.dto.client.ClientUpdateDto;
-import HealthAPI.exception.ClientNotFound;
 import HealthAPI.model.Address;
 import HealthAPI.model.Client;
-import HealthAPI.model.Gender;
 import HealthAPI.repository.ClientRepository;
-
-import java.time.LocalDate;
 
 import java.util.ArrayList;
 
 import java.util.Optional;
-
-import org.junit.jupiter.api.Disabled;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
