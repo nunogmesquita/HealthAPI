@@ -11,6 +11,8 @@ public interface UserConverter {
 
     UserDto fromUserToUserDto(User user);
 
+    User fromUserDtoToUser(UserDto userDto);
+
     ProfessionalDto fromUserToProfessionalDto(User user);
 
     User fromUserCreateDtoToUser(UserCreateDto userCreatedDto);

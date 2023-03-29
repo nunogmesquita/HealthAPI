@@ -2,6 +2,7 @@ package HealthAPI.controller;
 
 import HealthAPI.dto.client.ClientDto;
 import HealthAPI.dto.auth.RegisterRequest;
+import HealthAPI.dto.client.ClientUpdateDto;
 import HealthAPI.messages.Responses;
 import HealthAPI.service.ClientService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,16 +21,16 @@ public class ClientController {
 
     private final ClientService clientService;
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{clientId}")
     public ResponseEntity<String> deleteAccount(@PathVariable Long clientId) {
         clientService.deleteClient(clientId);
         return ResponseEntity.ok(Responses.DELETED_CLIENT.formatted(clientId));
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{clientId}")
     public ResponseEntity<ClientDto> updateAccount(@PathVariable Long clientId,
-                                                   @Valid @RequestBody RegisterRequest registerRequest) {
-        ClientDto clientDto = clientService.updateClient(clientId, registerRequest);
+                                                   @Valid @RequestBody ClientUpdateDto clientUpdateDto) {
+        ClientDto clientDto = clientService.updateClient(clientId, clientUpdateDto);
         return ResponseEntity.ok(clientDto);
     }
 
@@ -42,14 +43,13 @@ public class ClientController {
 
     @PatchMapping("/myaccount")
     public ResponseEntity<ClientDto> updateMyAccount(@NonNull HttpServletRequest header,
-                                                     @Valid @RequestBody RegisterRequest registerRequest) {
+                                                     @Valid @RequestBody ClientUpdateDto clientUpdateDto) {
         String clientEmail = header.getUserPrincipal().getName();
-        ClientDto clientDto = clientService.getClientByEmail(clientEmail);
-        ClientDto updatedClient = clientService.updateClient(clientDto.getId(), registerRequest);
+        ClientDto updatedClient = clientService.updateClient(clientEmail, clientUpdateDto);
         return ResponseEntity.ok(updatedClient);
     }
 
-    @GetMapping("/view/{id}")
+    @GetMapping("/view/{clientId}")
     public ResponseEntity<ClientDto> getClient(@PathVariable Long clientId) {
         ClientDto client = clientService.getClientById(clientId);
         return ResponseEntity.ok(client);

@@ -76,7 +76,7 @@ public class TimeSlotService {
         TimeSlot existingTimeSlot = timeSlotRepository.findById(timeSlotId)
                 .orElseThrow(() -> new ResourceNotFoundException("TimeSlot", "id", timeSlotId));
         existingTimeSlot.setStartTime(updatedTimeSlot.getTime());
-        existingTimeSlot.setDayOfWeek(updatedTimeSlot.getDayOfWeek().toString());
+        existingTimeSlot.setDayOfWeek(updatedTimeSlot.getTime().getDayOfWeek().toString());
         timeSlotRepository.save(existingTimeSlot);
         return timeSlotConverter.fromTimeSlotToTimeSlotDto(existingTimeSlot);
     }

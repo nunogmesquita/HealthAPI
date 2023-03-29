@@ -1,18 +1,18 @@
 package HealthAPI.dto.appointment;
 
-import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppointmentCreateDto {
+public class AppointmentUpdateDto {
 
-    @NotNull
     private Long userId;
 
-    @NotNull
     private Long timeSlotId;
 
 }

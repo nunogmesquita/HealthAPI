@@ -4,8 +4,10 @@ import HealthAPI.converter.AppointmentConverter;
 import HealthAPI.converter.ClientConverter;
 import HealthAPI.dto.appointment.AppointmentCreateDto;
 import HealthAPI.dto.appointment.AppointmentDto;
+import HealthAPI.dto.appointment.AppointmentUpdateDto;
 import HealthAPI.dto.client.ClientDto;
 import HealthAPI.exception.AppointmentAlreadyActive;
+import HealthAPI.exception.AppointmentAlreadyInactive;
 import HealthAPI.exception.AppointmentNotFound;
 import HealthAPI.model.*;
 import HealthAPI.repository.AppointmentRepository;
@@ -35,6 +37,7 @@ public class AppointmentService {
                 .client(clientConverter.fromClientDtoToClient(clientDto))
                 .status(Status.ACTIVE)
                 .build();
+        timeSlot.setAppointment(appointment);
         appointmentRepository.save(appointment);
         return appointmentConverter.fromAppointmentToAppointmentDto(appointment);
     }
@@ -52,10 +55,10 @@ public class AppointmentService {
         appointmentRepository.save(appointment);
     }
 
-    public AppointmentDto updateAppointment(Long appointmentId, AppointmentCreateDto appointmentCreateDto) {
+    public AppointmentDto updateAppointment(Long appointmentId, AppointmentUpdateDto appointmentUpdateDto) {
         Appointment appointmentToUpdate = appointmentConverter.fromAppointmentDtoAppointment(findAppointmentById(appointmentId));
-        appointmentToUpdate.setUser(userService.getUserById(appointmentCreateDto.getUserId()));
-        appointmentToUpdate.setTimeSlot(timeSlotService.getTimeSlotById(appointmentCreateDto.getTimeSlotId()));
+        NullUtils.updateIfPresent(appointmentToUpdate::setUser, userService.getUserById(appointmentUpdateDto.getUserId()));
+        NullUtils.updateIfPresent(appointmentToUpdate::setTimeSlot, timeSlotService.getTimeSlotById(appointmentUpdateDto.getTimeSlotId()));
         appointmentRepository.save(appointmentToUpdate);
         return appointmentConverter.fromAppointmentToAppointmentDto(appointmentToUpdate);
     }
@@ -80,7 +83,7 @@ public class AppointmentService {
         if (appointment.getStatus().equals(Status.ACTIVE)) {
             throw new AppointmentAlreadyActive(appointmentId);
         } else {
-            appointment.setStatus(Status.INACTIVE);
+            appointment.setStatus(Status.ACTIVE);
             appointmentRepository.save(appointment);
         }
         return appointmentConverter.fromAppointmentToAppointmentDto(appointment);

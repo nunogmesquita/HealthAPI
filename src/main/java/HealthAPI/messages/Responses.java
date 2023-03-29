@@ -15,5 +15,7 @@ public class Responses {
     public static final String TIMESLOT_NOT_FOUND = "TimeSlot not found";
     public static final String APPOINTMENT_NOT_FOUND = "Appointment not found.";
     public static final String APPOINTMENT_ALREADY_ACTIVE = "Appointment %s is already active.";
+    public static final String RESTORED_USER = "User %s has been restored.";
+    public static final String APPOINTMENT_ALREADY_INACTIVE = "Appointment %s has already been removed.";
 
 }

@@ -1,5 +1,6 @@
 package HealthAPI.model;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -35,6 +36,7 @@ public class User implements UserDetails, Serializable {
     String password;
 
     @Enumerated(EnumType.STRING)
+    @Nullable
     private Speciality speciality;
 
     @Enumerated (EnumType.STRING)
@@ -88,6 +90,10 @@ public class User implements UserDetails, Serializable {
 
     public void markAsDeleted() {
         this.deleted = true;
+    }
+
+    public void restore() {
+        this.deleted = false;
     }
 
     @Override

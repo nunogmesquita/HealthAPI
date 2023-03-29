@@ -25,13 +25,13 @@ public class TimeSlotController {
         return ResponseEntity.ok(Responses.TIMESLOTS_CREATED);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{timeSlotId}")
     public ResponseEntity<String> deleteTimeSlot(@PathVariable Long timeSlotId) {
         timeSlotService.deleteTimeSlot(timeSlotId);
         return ResponseEntity.ok(Responses.DELETED_TIMESLOT.formatted(timeSlotId));
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{timeSlotId}")
     public ResponseEntity<TimeSlotDto> updateTimeSlot(@PathVariable Long timeSlotId,
                                                       @RequestBody TimeSlotUpdateDto updatedTimeSlot) {
         TimeSlotDto timeSlot = timeSlotService.updateTimeSlot(timeSlotId, updatedTimeSlot);

@@ -1,10 +1,11 @@
-package HealthAPI.dto.auth;
+package HealthAPI.dto.client;
 
-import HealthAPI.dto.client.AddressDto;
 import HealthAPI.model.Gender;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -14,29 +15,21 @@ import java.time.LocalDate;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRequest {
+public class ClientUpdateDto {
 
-    @NotBlank(message = "Must have name.")
     private String fullName;
 
-    @NotBlank(message = "Must have email.")
-    @Pattern(regexp = "^((?!\\.)[\\w-_.]*[^.])(@\\w+)(\\.\\w+(\\.\\w+)?[^.\\W])$",
-            message = "Please insert a valid email.")
     private String email;
 
-    @NotBlank(message = "Must have password.")
     @Pattern(regexp = "^(?=.*[~!@#$%^&*()_+`\\-=\\[\\]\\{\\};':\\\",./<>?])(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])\\S{6,}$",
             message = "Password must have at least 8 characters: at least 1 uppercase letter, 1 lowercase letter, " +
                     "1 number and 1 special character.")
     private String password;
 
-    @NotNull(message = "Must have phone number.")
     private int phoneNumber;
 
-    @NotNull(message = "Must have birth date.")
     private LocalDate birthDate;
 
-    @NotNull(message = "Must have gender.")
     @Enumerated(EnumType.STRING)
     private Gender gender;
 

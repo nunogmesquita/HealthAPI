@@ -3,6 +3,7 @@ package HealthAPI.controller;
 import HealthAPI.converter.UserConverter;
 import HealthAPI.dto.user.UserCreateDto;
 import HealthAPI.dto.user.UserDto;
+import HealthAPI.dto.user.UserUpdateDto;
 import HealthAPI.messages.Responses;
 import HealthAPI.model.User;
 import HealthAPI.service.UserService;
@@ -39,16 +40,15 @@ public class UserController {
 
     @PatchMapping("/myaccount")
     public ResponseEntity<UserDto> updateMyAccount(@NonNull HttpServletRequest request,
-                                                   @Valid @RequestBody UserCreateDto userCreateDto) {
+                                                   @Valid @RequestBody UserUpdateDto userUpdateDto) {
         String userEmail = request.getUserPrincipal().getName();
-        UserDto user = userService.getUserByEmail(userEmail);
-        UserDto updatedUser = userService.updateUser(user.getId(), userCreateDto);
+        UserDto updatedUser = userService.updateUser(userEmail, userUpdateDto);
         return ResponseEntity.ok(updatedUser);
     }
 
-    @PatchMapping("/editprofile/{id}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable Long userId, @Valid @RequestBody UserCreateDto userCreateDto) {
-        UserDto user = userService.updateUser(userId, userCreateDto);
+    @PatchMapping("/editprofile/{userId}")
+    public ResponseEntity<UserDto> updateUser(@PathVariable Long userId, @Valid @RequestBody UserUpdateDto userUpdateDto) {
+        UserDto user = userService.updateUser(userId, userUpdateDto);
         return ResponseEntity.ok(user);
     }
 
@@ -58,7 +58,7 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    @GetMapping("/viewprofile/{id}")
+    @GetMapping("/viewprofile/{userId}")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long userId) {
         User user = userService.getUserById(userId);
         UserDto userDto = userConverter.fromUserToUserDto(user);
@@ -71,10 +71,16 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{userId}")
     public ResponseEntity<String> deleteAccount(@PathVariable Long userId) {
         userService.deleteUser(userId);
         return ResponseEntity.ok(Responses.DELETED_USER.formatted(userId));
+    }
+
+    @GetMapping("/restore/{userId}")
+    public ResponseEntity<String> restoreAccount(@PathVariable Long userId) {
+        userService.restoreUser(userId);
+        return ResponseEntity.ok(Responses.RESTORED_USER.formatted(userId));
     }
 
 }

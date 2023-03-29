@@ -4,9 +4,11 @@ import HealthAPI.converter.AddressConverter;
 import HealthAPI.converter.ClientConverter;
 import HealthAPI.dto.client.ClientDto;
 import HealthAPI.dto.auth.RegisterRequest;
+import HealthAPI.dto.client.ClientUpdateDto;
 import HealthAPI.exception.ClientNotFound;
 import HealthAPI.messages.Responses;
 import HealthAPI.model.Client;
+import HealthAPI.model.NullUtils;
 import HealthAPI.repository.ClientRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,16 +30,32 @@ public class ClientService {
         clientRepository.save(client);
     }
 
-    public ClientDto updateClient(Long clientId, RegisterRequest registerRequest) {
-        Client client = clientRepository.getReferenceById(clientId);
-        client.setFullName(registerRequest.getFullName());
-        client.setPhoneNumber(registerRequest.getPhoneNumber());
-        client.setEmail(registerRequest.getEmail());
-        client.setPassword(registerRequest.getPassword());
-        client.setBirthDate(registerRequest.getBirthDate());
-        client.setGender(registerRequest.getGender());
-        client.setNIF(registerRequest.getNIF());
-        client.setAddress(addressConverter.fromAddressDtoToAddress(registerRequest.getAddress()));
+    public ClientDto updateClient(Long clientId, ClientUpdateDto clientUpdateDto) {
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new ClientNotFound(Responses.CLIENT_NOT_FOUND.formatted(clientId)));
+        NullUtils.updateIfPresent(client::setFullName, clientUpdateDto.getFullName());
+        NullUtils.updateIfPresent(client::setPhoneNumber, clientUpdateDto.getPhoneNumber());
+        NullUtils.updateIfPresent(client::setEmail, clientUpdateDto.getEmail());
+        NullUtils.updateIfPresent(client::setPassword, clientUpdateDto.getPassword());
+        NullUtils.updateIfPresent(client::setBirthDate, clientUpdateDto.getBirthDate());
+        NullUtils.updateIfPresent(client::setGender, clientUpdateDto.getGender());
+        NullUtils.updateIfPresent(client::setNIF, clientUpdateDto.getNIF());
+        NullUtils.updateIfPresent(client::setAddress, addressConverter.fromAddressDtoToAddress(clientUpdateDto.getAddress()));
+        clientRepository.save(client);
+        return clientConverter.fromClientToClientDto(client);
+    }
+
+    public ClientDto updateClient(String clientEmail, ClientUpdateDto clientUpdateDto) {
+        Client client = clientRepository.findByEmail(clientEmail)
+                        .orElseThrow(() -> new ClientNotFound(Responses.CLIENT_NOT_FOUND.formatted(clientEmail)));
+        NullUtils.updateIfPresent(client::setFullName, clientUpdateDto.getFullName());
+        NullUtils.updateIfPresent(client::setPhoneNumber, clientUpdateDto.getPhoneNumber());
+        NullUtils.updateIfPresent(client::setEmail, clientUpdateDto.getEmail());
+        NullUtils.updateIfPresent(client::setPassword, clientUpdateDto.getPassword());
+        NullUtils.updateIfPresent(client::setBirthDate, clientUpdateDto.getBirthDate());
+        NullUtils.updateIfPresent(client::setGender, clientUpdateDto.getGender());
+        NullUtils.updateIfPresent(client::setNIF, clientUpdateDto.getNIF());
+        NullUtils.updateIfPresent(client::setAddress, addressConverter.fromAddressDtoToAddress(clientUpdateDto.getAddress()));
         clientRepository.save(client);
         return clientConverter.fromClientToClientDto(client);
     }

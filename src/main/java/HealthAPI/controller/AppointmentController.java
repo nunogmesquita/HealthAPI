@@ -2,6 +2,7 @@ package HealthAPI.controller;
 
 import HealthAPI.dto.appointment.AppointmentCreateDto;
 import HealthAPI.dto.appointment.AppointmentDto;
+import HealthAPI.dto.appointment.AppointmentUpdateDto;
 import HealthAPI.messages.Responses;
 import HealthAPI.service.AppointmentService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,38 +30,38 @@ public class AppointmentController {
         return ResponseEntity.ok(appointmentDto);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{appointmentId}")
     public ResponseEntity<AppointmentDto> getAppointmentById(@PathVariable Long appointmentId) {
         AppointmentDto appointmentDto = appointmentService.findAppointmentById(appointmentId);
         return ResponseEntity.ok(appointmentDto);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{appointmentId}")
     public ResponseEntity<String> deleteAppointmentById(@PathVariable Long appointmentId) {
         appointmentService.deleteAppointmentById(appointmentId);
         return ResponseEntity.ok(Responses.DELETED_APPOINTMENT.formatted(appointmentId));
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{appointmentId}")
     public ResponseEntity<AppointmentDto> updateAppointment(@PathVariable Long appointmentId,
-                                                            @Valid @RequestBody AppointmentCreateDto appointmentCreateDto) {
-        AppointmentDto appointmentDto = appointmentService.updateAppointment(appointmentId, appointmentCreateDto);
+                                                            @Valid @RequestBody AppointmentUpdateDto updatedAppointment) {
+        AppointmentDto appointmentDto = appointmentService.updateAppointment(appointmentId, updatedAppointment);
         return ResponseEntity.ok(appointmentDto);
     }
 
-    @GetMapping("/listbyuser/{id}")
+    @GetMapping("/listbyuser/{userId}")
     public ResponseEntity<List<AppointmentDto>> getAllAppointmentByUserId(@PathVariable Long userId) {
         List<AppointmentDto> appointmentList = appointmentService.findAllByUserId(userId);
         return ResponseEntity.ok(appointmentList);
     }
 
-    @GetMapping("/listbyclient/{id}")
+    @GetMapping("/listbyclient/{clientId}")
     public ResponseEntity<List<AppointmentDto>> getAllAppointmentByClientId(@PathVariable Long clientId) {
         List<AppointmentDto> appointmentList = appointmentService.findAllByClientId(clientId);
         return ResponseEntity.ok(appointmentList);
     }
 
-    @PostMapping("/restore/{id}")
+    @PostMapping("/restore/{appointmentId}")
     public ResponseEntity<AppointmentDto> restoreById(@PathVariable Long appointmentId) {
         AppointmentDto appointmentDto = appointmentService.restoreById(appointmentId);
         return new ResponseEntity<>(appointmentDto, HttpStatus.OK);

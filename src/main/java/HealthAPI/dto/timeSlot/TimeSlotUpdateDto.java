@@ -2,7 +2,6 @@ package HealthAPI.dto.timeSlot;
 
 import lombok.*;
 
-import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 
 @Builder
@@ -13,9 +12,4 @@ public class TimeSlotUpdateDto {
 
     private LocalDateTime time;
 
-    private DayOfWeek dayOfWeek;
-
-    private int month;
-
-    private int year;
 }

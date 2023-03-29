@@ -4,8 +4,10 @@ import HealthAPI.converter.UserConverter;
 import HealthAPI.dto.user.ProfessionalDto;
 import HealthAPI.dto.user.UserCreateDto;
 import HealthAPI.dto.user.UserDto;
+import HealthAPI.dto.user.UserUpdateDto;
 import HealthAPI.exception.UserNotFound;
 import HealthAPI.messages.Responses;
+import HealthAPI.model.NullUtils;
 import HealthAPI.model.Speciality;
 import HealthAPI.model.User;
 import HealthAPI.repository.UserRepository;
@@ -56,15 +58,26 @@ public class UserService {
         return userConverter.fromUserToUserDto(user);
     }
 
-    public UserDto updateUser(Long userId, UserCreateDto userCreateDto) {
+    public UserDto updateUser(Long userId, UserUpdateDto userUpdateDto) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFound(Responses.USER_NOT_FOUND.formatted(userId)));
-        user.setFirstName(userCreateDto.getFirstName());
-        user.setLastName(userCreateDto.getLastName());
-        user.setEmail(userCreateDto.getEmail());
-        user.setPassword(userCreateDto.getPassword());
-        user.setSpeciality(userCreateDto.getSpeciality());
-        user.setRole(userCreateDto.getRole());
+                .orElseThrow();
+        NullUtils.updateIfPresent(user::setFirstName, userUpdateDto.getFirstName());
+        NullUtils.updateIfPresent(user::setLastName, userUpdateDto.getLastName());
+        NullUtils.updateIfPresent(user::setEmail, userUpdateDto.getEmail());
+        NullUtils.updateIfPresent(user::setPassword, userUpdateDto.getPassword());
+        NullUtils.updateIfPresent(user::setSpeciality, userUpdateDto.getSpeciality());
+        userRepository.save(user);
+        return userConverter.fromUserToUserDto(user);
+    }
+
+    public UserDto updateUser(String userEmail, UserUpdateDto userUpdateDto) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow();
+        NullUtils.updateIfPresent(user::setFirstName, userUpdateDto.getFirstName());
+        NullUtils.updateIfPresent(user::setLastName, userUpdateDto.getLastName());
+        NullUtils.updateIfPresent(user::setEmail, userUpdateDto.getEmail());
+        NullUtils.updateIfPresent(user::setPassword, userUpdateDto.getPassword());
+        NullUtils.updateIfPresent(user::setSpeciality, userUpdateDto.getSpeciality());
         userRepository.save(user);
         return userConverter.fromUserToUserDto(user);
     }
@@ -89,10 +102,16 @@ public class UserService {
     }
 
     public void deleteUser(Long userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new UserNotFound(Responses.USER_NOT_FOUND.formatted(userId)));
         user.markAsDeleted();
         userRepository.save(user);
     }
 
+    public void restoreUser(Long userId) {
+        User user = userRepository.findByIdAndDeletedTrue(userId)
+                .orElseThrow(() -> new UserNotFound(Responses.USER_NOT_FOUND.formatted(userId)));
+        user.restore();
+        userRepository.save(user);
+    }
 }

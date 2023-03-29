@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-03-29T15:51:31+0100",
+    date = "2023-03-29T17:13:11+0100",
     comments = "version: 1.4.1.Final, compiler: javac, environment: Java 19.0.1 (Oracle Corporation)"
 )
 @Component
@@ -33,6 +33,23 @@ public class UserConverterImpl implements UserConverter {
         userDto.speciality( user.getSpeciality() );
 
         return userDto.build();
+    }
+
+    @Override
+    public User fromUserDtoToUser(UserDto userDto) {
+        if ( userDto == null ) {
+            return null;
+        }
+
+        UserBuilder user = User.builder();
+
+        user.id( userDto.getId() );
+        user.firstName( userDto.getFirstName() );
+        user.lastName( userDto.getLastName() );
+        user.email( userDto.getEmail() );
+        user.speciality( userDto.getSpeciality() );
+
+        return user.build();
     }
 
     @Override
