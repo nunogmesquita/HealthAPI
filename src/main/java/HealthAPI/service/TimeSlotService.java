@@ -1,15 +1,15 @@
 package HealthAPI.service;
 
 import HealthAPI.converter.TimeSlotConverter;
-import HealthAPI.converter.UserConverter;
-import HealthAPI.dto.TimeSlot.TimeSlotDto;
-import HealthAPI.dto.TimeSlot.TimeSlotUpdateDto;
-import HealthAPI.dto.TimeSlot.WeeklyTimeSlotDto;
+import HealthAPI.dto.timeSlot.TimeSlotDto;
+import HealthAPI.dto.timeSlot.TimeSlotUpdateDto;
+import HealthAPI.dto.timeSlot.WeeklyTimeSlotDto;
 import HealthAPI.exception.ResourceNotFoundException;
+import HealthAPI.exception.TimeSlotNotFound;
 import HealthAPI.model.*;
 import HealthAPI.repository.TimeSlotRepository;
-import HealthAPI.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -20,24 +20,15 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class TimeSlotService {
 
     private final TimeSlotRepository timeSlotRepository;
-    private final UserConverter userConverter;
     private final TimeSlotConverter timeSlotConverter;
-    private final UserRepository userRepository;
-
-    @Autowired
-    public TimeSlotService(TimeSlotRepository timeSlotRepository, UserConverter userConverter,
-                           TimeSlotConverter timeSlotConverter, UserRepository userRepository) {
-        this.timeSlotRepository = timeSlotRepository;
-        this.userConverter = userConverter;
-        this.timeSlotConverter = timeSlotConverter;
-        this.userRepository = userRepository;
-    }
+    private final UserService userService;
 
     public void generateWeeklyTimeSlots(WeeklyTimeSlotDto weeklyTimeSlotDto) {
-        User user = userRepository.findById(weeklyTimeSlotDto.getUserId()).orElseThrow();
+        User user = userService.getUserById(weeklyTimeSlotDto.getUserId());
         LocalDate startDate = weeklyTimeSlotDto.getDate();
         LocalDate endDate = startDate.plusMonths(1);
         List<LocalTimeRange> excludedRanges = new ArrayList<>();
@@ -77,6 +68,19 @@ public class TimeSlotService {
         }
     }
 
+    public void deleteTimeSlot(Long timeSlotId) {
+        timeSlotRepository.deleteById(timeSlotId);
+    }
+
+    public TimeSlotDto updateTimeSlot(Long timeSlotId, TimeSlotUpdateDto updatedTimeSlot) {
+        TimeSlot existingTimeSlot = timeSlotRepository.findById(timeSlotId)
+                .orElseThrow(() -> new ResourceNotFoundException("TimeSlot", "id", timeSlotId));
+        existingTimeSlot.setStartTime(updatedTimeSlot.getTime());
+        existingTimeSlot.setDayOfWeek(updatedTimeSlot.getDayOfWeek().toString());
+        timeSlotRepository.save(existingTimeSlot);
+        return timeSlotConverter.fromTimeSlotToTimeSlotDto(existingTimeSlot);
+    }
+
     public List<TimeSlotDto> getAvailableTimeSlots(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         List<TimeSlot> timeSlots = timeSlotRepository.findByIsBookedFalse(pageable).getContent();
@@ -87,7 +91,7 @@ public class TimeSlotService {
 
     public List<TimeSlotDto> getAvailableTimeSlotsByUser(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("startTime").ascending());
-        List<TimeSlot> timeSlots = timeSlotRepository.findByUserAndIsBookedFalse(userId, pageable).getContent();
+        List<TimeSlot> timeSlots = timeSlotRepository.findByUser_IdAndIsBookedFalse(userId, pageable).getContent();
         return timeSlots.parallelStream()
                 .map(timeSlotConverter::fromTimeSlotToTimeSlotDto)
                 .toList();
@@ -101,27 +105,14 @@ public class TimeSlotService {
                 .toList();
     }
 
+    @Transactional
     public void deleteAllTimeSlotsByUser(Long userId) {
-        timeSlotRepository.deleteByUser_Id(userId);
+        timeSlotRepository.deleteAllByUser_Id(userId);
     }
 
-    public void deleteTimeSlot(Long id) {
-        timeSlotRepository.deleteById(id);
-    }
-
-    public TimeSlotDto updateTimeSlot(Long id, TimeSlotUpdateDto updatedTimeSlot) {
-        TimeSlot existingTimeSlot = timeSlotRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("TimeSlot", "id", id));
-
-        existingTimeSlot.setStartTime(updatedTimeSlot.getTime());
-        existingTimeSlot.setDayOfWeek(updatedTimeSlot.getDayOfWeek().toString());
-        timeSlotRepository.save(existingTimeSlot);
-        return timeSlotConverter.fromTimeSlotToTimeSlotDto(existingTimeSlot);
-    }
-
-    public TimeSlot getTimeSlotById(Long id) {
-        return timeSlotRepository.findById(id)
-                .orElseThrow();
+    public TimeSlot getTimeSlotById(Long timeSlotId) {
+        return timeSlotRepository.findById(timeSlotId)
+                .orElseThrow(TimeSlotNotFound::new);
     }
 
 }

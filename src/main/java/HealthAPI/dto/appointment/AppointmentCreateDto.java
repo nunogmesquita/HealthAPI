@@ -1,19 +1,15 @@
-package HealthAPI.dto;
+package HealthAPI.dto.appointment;
 
 import lombok.*;
 
 @Getter
-@Setter
 @Builder
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class AppointmentCreateDto {
 
-    Long userId;
+    private Long userId;
 
-    Long timeSlotId;
-
-    Long clientId;
+    private Long timeSlotId;
 
 }

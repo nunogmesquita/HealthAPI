@@ -14,12 +14,12 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
 
     Page<TimeSlot> findByIsBookedFalse(Pageable pageable);
 
-    Page<TimeSlot> findByUserAndIsBookedFalse(Long userId, Pageable pageable);
+    Page<TimeSlot> findByUser_IdAndIsBookedFalse(Long userId, Pageable pageable);
 
     Page<TimeSlot> findByUser_SpecialityAndIsBookedFalse(Speciality speciality, Pageable pageable);
 
-    void deleteByUser_Id(Long userId);
-
     Optional<TimeSlot> findById(Long id);
+
+    void deleteAllByUser_Id(Long userId);
 
 }

@@ -1,9 +1,6 @@
 package HealthAPI.model;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Null;
-import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -38,7 +35,6 @@ public class User implements UserDetails, Serializable {
     String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = true)
     private Speciality speciality;
 
     @Enumerated (EnumType.STRING)

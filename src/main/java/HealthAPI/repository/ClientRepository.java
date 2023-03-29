@@ -12,11 +12,10 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
 
     Optional<Client> findByEmail(String email);
 
-    Client findByTokens(String jwt);
-
-    List<Client> findByDeleted(Boolean deleted);
-
     Optional<Client> findById(Long id);
 
-    Optional<Client> findByIdAndDeleted(Long id, boolean deleted);
+    Optional<Client> findByIdAndDeletedFalse(Long id);
+
+    List<Client> findByDeletedFalse();
+
 }

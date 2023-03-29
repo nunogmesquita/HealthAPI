@@ -1,6 +1,5 @@
-package HealthAPI.dto.Client;
+package HealthAPI.dto.client;
 
-import HealthAPI.dto.AddressDto;
 import HealthAPI.model.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

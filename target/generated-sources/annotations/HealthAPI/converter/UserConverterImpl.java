@@ -1,12 +1,10 @@
 package HealthAPI.converter;
 
-import HealthAPI.dto.User.ProfessionalDto;
-import HealthAPI.dto.User.ProfessionalDto.ProfessionalDtoBuilder;
-import HealthAPI.dto.User.UserCreateDto;
-import HealthAPI.dto.User.UserCreateDto.UserCreateDtoBuilder;
-import HealthAPI.dto.User.UserDto;
-import HealthAPI.dto.User.UserDto.UserDtoBuilder;
-import HealthAPI.model.Speciality;
+import HealthAPI.dto.user.ProfessionalDto;
+import HealthAPI.dto.user.ProfessionalDto.ProfessionalDtoBuilder;
+import HealthAPI.dto.user.UserCreateDto;
+import HealthAPI.dto.user.UserDto;
+import HealthAPI.dto.user.UserDto.UserDtoBuilder;
 import HealthAPI.model.User;
 import HealthAPI.model.User.UserBuilder;
 import javax.annotation.processing.Generated;
@@ -14,46 +12,11 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-03-29T09:14:58+0100",
+    date = "2023-03-29T15:51:31+0100",
     comments = "version: 1.4.1.Final, compiler: javac, environment: Java 19.0.1 (Oracle Corporation)"
 )
 @Component
 public class UserConverterImpl implements UserConverter {
-
-    @Override
-    public UserCreateDto fromUserToUserCreateDto(User user) {
-        if ( user == null ) {
-            return null;
-        }
-
-        UserCreateDtoBuilder userCreateDto = UserCreateDto.builder();
-
-        userCreateDto.firstName( user.getFirstName() );
-        userCreateDto.lastName( user.getLastName() );
-        userCreateDto.email( user.getEmail() );
-        userCreateDto.password( user.getPassword() );
-        userCreateDto.speciality( user.getSpeciality() );
-        userCreateDto.role( user.getRole() );
-
-        return userCreateDto.build();
-    }
-
-    @Override
-    public User fromUserDtoToUser(UserDto userDto) {
-        if ( userDto == null ) {
-            return null;
-        }
-
-        UserBuilder user = User.builder();
-
-        user.id( userDto.getId() );
-        user.firstName( userDto.getFirstName() );
-        user.lastName( userDto.getLastName() );
-        user.email( userDto.getEmail() );
-        user.speciality( userDto.getSpeciality() );
-
-        return user.build();
-    }
 
     @Override
     public UserDto fromUserToUserDto(User user) {
@@ -70,24 +33,6 @@ public class UserConverterImpl implements UserConverter {
         userDto.speciality( user.getSpeciality() );
 
         return userDto.build();
-    }
-
-    @Override
-    public User fromProfessionalDtoToUser(ProfessionalDto professionalDto) {
-        if ( professionalDto == null ) {
-            return null;
-        }
-
-        UserBuilder user = User.builder();
-
-        user.id( professionalDto.getId() );
-        user.firstName( professionalDto.getFirstName() );
-        user.lastName( professionalDto.getLastName() );
-        if ( professionalDto.getSpeciality() != null ) {
-            user.speciality( Enum.valueOf( Speciality.class, professionalDto.getSpeciality() ) );
-        }
-
-        return user.build();
     }
 
     @Override

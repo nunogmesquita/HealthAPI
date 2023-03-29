@@ -2,17 +2,20 @@ package HealthAPI.service;
 
 import HealthAPI.converter.AppointmentConverter;
 import HealthAPI.converter.ClientConverter;
-import HealthAPI.dto.AppointmentCreateDto;
-import HealthAPI.dto.AppointmentDto;
-import HealthAPI.dto.Client.ClientDto;
+import HealthAPI.dto.appointment.AppointmentCreateDto;
+import HealthAPI.dto.appointment.AppointmentDto;
+import HealthAPI.dto.client.ClientDto;
+import HealthAPI.exception.AppointmentAlreadyActive;
+import HealthAPI.exception.AppointmentNotFound;
 import HealthAPI.model.*;
 import HealthAPI.repository.AppointmentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
@@ -22,72 +25,65 @@ public class AppointmentService {
     private final AppointmentConverter appointmentConverter;
     private final ClientConverter clientConverter;
 
-    @Autowired
-    public AppointmentService(AppointmentRepository appointmentRepository, UserService userService,
-                              ClientService clientService, TimeSlotService timeSlotService,
-                              AppointmentConverter appointmentConverter, ClientConverter clientConverter) {
-        this.appointmentRepository = appointmentRepository;
-        this.userService = userService;
-        this.clientService = clientService;
-        this.timeSlotService = timeSlotService;
-        this.appointmentConverter = appointmentConverter;
-        this.clientConverter = clientConverter;
-    }
-
-    public AppointmentDto createAppointment(AppointmentCreateDto appointmentCreateDto) {
+    public AppointmentDto createAppointment(String clientEmail, AppointmentCreateDto appointmentCreateDto) {
         User user = userService.getUserById(appointmentCreateDto.getUserId());
         TimeSlot timeSlot = timeSlotService.getTimeSlotById(appointmentCreateDto.getTimeSlotId());
-        ClientDto client = clientService.getClientById(appointmentCreateDto.getClientId());
+        ClientDto clientDto = clientService.getClientByEmail(clientEmail);
         Appointment appointment = Appointment.builder()
                 .user(user)
                 .timeSlot(timeSlot)
-                .client(clientConverter.fromClientDtoToClient(client))
+                .client(clientConverter.fromClientDtoToClient(clientDto))
+                .status(Status.ACTIVE)
                 .build();
         appointmentRepository.save(appointment);
         return appointmentConverter.fromAppointmentToAppointmentDto(appointment);
     }
 
-    public AppointmentDto findAppointmentById(Long id) {
-        Appointment appointment = appointmentRepository.findById(id)
-                .orElseThrow();
+    public AppointmentDto findAppointmentById(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findByIdAndStatus(appointmentId, Status.ACTIVE)
+                .orElseThrow(AppointmentNotFound::new);
         return appointmentConverter.fromAppointmentToAppointmentDto(appointment);
     }
 
-    public void deleteAppointmentById(Long id) {
-        Appointment fetchedAppointment = appointmentConverter.fromAppointmentDtoAppointment(findAppointmentById(id));
-        if (fetchedAppointment != null) {
-            fetchedAppointment.setSTATUS(Status.INACTIVE);
-            appointmentRepository.save(fetchedAppointment);
-        }
+    public void deleteAppointmentById(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(AppointmentNotFound::new);
+        appointment.setStatus(Status.INACTIVE);
+        appointmentRepository.save(appointment);
     }
 
-    public AppointmentDto restoreById(Long id) {
-        if (appointmentRepository.findById(id).isPresent()) {
-            Appointment fetchedAppointment = appointmentRepository.findById(id).get();
-            return appointmentConverter.fromAppointmentToAppointmentDto(fetchedAppointment);
-        }
-
-//            if (fetchedAppointment.getSTATUS().equals(Status.ACTIVE)) {
-//                return ResponseEntity.badRequest().body("Already ACTIVE");
-//            } else {
-//                fetchedAppointment.setSTATUS(Status.ACTIVE);
-//                appointmentRepository.save(fetchedAppointment);
-//                return ResponseEntity.ok(fetchedAppointment);
-        return null;
-    }
-
-    public List<AppointmentDto> findAllByClientId(Long clientId) {
-        List<Appointment> appointments = appointmentRepository.findAllByClientIdAndSTATUS(clientId, Status.ACTIVE);
-        return appointments.parallelStream()
-                .map(appointmentConverter::fromAppointmentToAppointmentDto)
-                .toList();
+    public AppointmentDto updateAppointment(Long appointmentId, AppointmentCreateDto appointmentCreateDto) {
+        Appointment appointmentToUpdate = appointmentConverter.fromAppointmentDtoAppointment(findAppointmentById(appointmentId));
+        appointmentToUpdate.setUser(userService.getUserById(appointmentCreateDto.getUserId()));
+        appointmentToUpdate.setTimeSlot(timeSlotService.getTimeSlotById(appointmentCreateDto.getTimeSlotId()));
+        appointmentRepository.save(appointmentToUpdate);
+        return appointmentConverter.fromAppointmentToAppointmentDto(appointmentToUpdate);
     }
 
     public List<AppointmentDto> findAllByUserId(Long userId) {
-        List<Appointment> appointments = appointmentRepository.findAllByUserIdAndSTATUS(userId, Status.ACTIVE);
+        List<Appointment> appointments = appointmentRepository.findAllByUser_IdAndStatus(userId, Status.ACTIVE);
         return appointments.parallelStream()
                 .map(appointmentConverter::fromAppointmentToAppointmentDto)
                 .toList();
+    }
+
+    public List<AppointmentDto> findAllByClientId(Long clientId) {
+        List<Appointment> appointments = appointmentRepository.findAllByClient_IdAndStatus(clientId, Status.ACTIVE);
+        return appointments.parallelStream()
+                .map(appointmentConverter::fromAppointmentToAppointmentDto)
+                .toList();
+    }
+
+    public AppointmentDto restoreById(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(AppointmentNotFound::new);
+        if (appointment.getStatus().equals(Status.ACTIVE)) {
+            throw new AppointmentAlreadyActive(appointmentId);
+        } else {
+            appointment.setStatus(Status.INACTIVE);
+            appointmentRepository.save(appointment);
+        }
+        return appointmentConverter.fromAppointmentToAppointmentDto(appointment);
     }
 
 }

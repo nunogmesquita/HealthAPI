@@ -1,100 +1,80 @@
 package HealthAPI.controller;
 
 import HealthAPI.converter.UserConverter;
-import HealthAPI.dto.User.UserCreateDto;
-import HealthAPI.dto.User.UserDto;
+import HealthAPI.dto.user.UserCreateDto;
+import HealthAPI.dto.user.UserDto;
 import HealthAPI.messages.Responses;
 import HealthAPI.model.User;
 import HealthAPI.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
     private final UserConverter userConverter;
 
-    @Autowired
-    public UserController(UserService userService, UserConverter userConverter) {
-        this.userService = userService;
-        this.userConverter = userConverter;
+    @PostMapping("")
+    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserCreateDto user) {
+        UserDto savedUser = userService.createUser(user);
+        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/myaccount")
+    public ResponseEntity<UserDto> getMyAccount(@NonNull HttpServletRequest request) {
+        String userEmail = request.getUserPrincipal().getName();
+        UserDto userDto = userService.getUserByEmail(userEmail);
+        return ResponseEntity.ok(userDto);
+    }
+
+    @PatchMapping("/myaccount")
+    public ResponseEntity<UserDto> updateMyAccount(@NonNull HttpServletRequest request,
+                                                   @Valid @RequestBody UserCreateDto userCreateDto) {
+        String userEmail = request.getUserPrincipal().getName();
+        UserDto user = userService.getUserByEmail(userEmail);
+        UserDto updatedUser = userService.updateUser(user.getId(), userCreateDto);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    @PatchMapping("/editprofile/{id}")
+    public ResponseEntity<UserDto> updateUser(@PathVariable Long userId, @Valid @RequestBody UserCreateDto userCreateDto) {
+        UserDto user = userService.updateUser(userId, userCreateDto);
+        return ResponseEntity.ok(user);
     }
 
     @GetMapping("/viewprofiles")
     public ResponseEntity<List<UserDto>> getAllUsers() {
         List<UserDto> users = userService.getAllUsers();
-        return new ResponseEntity<>(users, HttpStatus.OK);
+        return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/viewprofile/{id}")
+    public ResponseEntity<UserDto> getUserById(@PathVariable Long userId) {
+        User user = userService.getUserById(userId);
+        UserDto userDto = userConverter.fromUserToUserDto(user);
+        return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
 
     @GetMapping("/viewinactiveprofiles")
     public ResponseEntity<List<UserDto>> getAllDeletedUsers() {
         List<UserDto> users = userService.getAllDeletedUsers();
-        return new ResponseEntity<>(users, HttpStatus.OK);
-    }
-
-    @GetMapping("/viewprofile/{id}")
-    public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
-        User user = userService.getUserById(id);
-        UserDto userDto = userConverter.fromUserToUserDto(user);
-        return new ResponseEntity<>(userDto, HttpStatus.OK);
-    }
-
-    @GetMapping("/myaccount")
-    public ResponseEntity<UserDto> getMyAccount(@NonNull HttpServletRequest request) {
-        String jwt = request.getHeader("Authorization").substring(7);
-        UserDto userDto = userService.getUserByToken(jwt);
-        return new ResponseEntity<>(userDto, HttpStatus.OK);
-    }
-
-    @PostMapping("")
-    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserCreateDto user, BindingResult bindingResult) {
-//        if (bindingResult.hasErrors()) {
-//            List<FieldError> errors = bindingResult.getFieldErrors();
-//            for (FieldError error : errors) {
-//                System.out.println(error.getObjectName() + " - " + error.getDefaultMessage());
-//            }
-//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//        }
-        UserDto savedUser = userService.createUser(user);
-        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
-    }
-
-    @PatchMapping("/editprofile/{id}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @Valid @RequestBody UserCreateDto userCreateDto) {
-        UserDto user = userService.updateUser(id, userCreateDto);
-        return new ResponseEntity<>(user, HttpStatus.OK);
-    }
-
-    @PatchMapping("/myaccount")
-    public ResponseEntity<UserDto> updateMyAccount(@NonNull HttpServletRequest request, @Valid @RequestBody UserCreateDto userCreateDto, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-
-            List<FieldError> errors = bindingResult.getFieldErrors();
-            for (FieldError error : errors) {
-                System.out.println(error.getObjectName() + " - " + error.getDefaultMessage());
-            }
-        }
-        String jwt = request.getHeader("Authorization").substring(7);
-        UserDto user = userService.getUserByToken(jwt);
-        UserDto updatedUser = userService.updateUser(user.getId(), userCreateDto);
-        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+        return ResponseEntity.ok(users);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteAccount(@PathVariable Long id) {
-        userService.deleteUser(id);
-        return new ResponseEntity<>(Responses.DELETED_USER.formatted(id), HttpStatus.OK);
+    public ResponseEntity<String> deleteAccount(@PathVariable Long userId) {
+        userService.deleteUser(userId);
+        return ResponseEntity.ok(Responses.DELETED_USER.formatted(userId));
     }
 
 }

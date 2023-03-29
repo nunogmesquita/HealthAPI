@@ -1,4 +1,4 @@
-package HealthAPI.dto.User;
+package HealthAPI.dto.user;
 
 import HealthAPI.model.Role;
 import HealthAPI.model.Speciality;
@@ -17,22 +17,25 @@ import lombok.NoArgsConstructor;
 public class UserCreateDto {
 
     @NotBlank(message = "Must have first name.")
-    String firstName;
+    private String firstName;
 
     @NotBlank(message = "Must have last name.")
-    String lastName;
+    private String lastName;
 
     @NotBlank(message = "Must have email.")
     @Pattern(regexp = "^((?!\\.)[\\w-_.]*[^.])(@\\w+)(\\.\\w+(\\.\\w+)?[^.\\W])$",
             message = "Please insert a valid email.")
-    String email;
+    private String email;
 
     @NotBlank(message = "Must have password.")
+    @Pattern(regexp = "^((?=\\\\S*?[A-Z])(?=\\\\S*?[a-z])(?=\\\\S*?[0-9]).{8,})\\\\S$",
+            message = "Password must have at least 8 characters: at least 1 uppercase letter, 1 lowercase letter, " +
+                    "and 1 number with no spaces.")
     private String password;
 
-    Speciality speciality;
+    private Speciality speciality;
 
     @NotNull(message = "Must have role.")
-    Role role;
+    private Role role;
 
 }

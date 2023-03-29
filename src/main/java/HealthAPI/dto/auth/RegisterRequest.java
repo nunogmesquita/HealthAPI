@@ -1,18 +1,17 @@
-package HealthAPI.dto;
+package HealthAPI.dto.auth;
 
+import HealthAPI.dto.client.AddressDto;
 import HealthAPI.model.Gender;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
 import lombok.*;
-import org.hibernate.validator.constraints.UniqueElements;
 
 import java.time.LocalDate;
 
 @Data
 @Builder
 @Getter
-@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterRequest {
@@ -21,11 +20,14 @@ public class RegisterRequest {
     private String fullName;
 
     @NotBlank(message = "Must have email.")
-    @Pattern(regexp = "^((?!\\.)[\\w-_.]*[^.])(@\\w+)(\\.\\w+(\\.\\w+)?[^.\\W])$", message = "Please insert a valid email.")
+    @Pattern(regexp = "^((?!\\.)[\\w-_.]*[^.])(@\\w+)(\\.\\w+(\\.\\w+)?[^.\\W])$",
+            message = "Please insert a valid email.")
     private String email;
 
-    @NotEmpty
-    @Size(min = 8, message = "Password should have at least 8 characters")
+    @NotBlank(message = "Must have password.")
+    @Pattern(regexp = "^((?=\\\\S*?[A-Z])(?=\\\\S*?[a-z])(?=\\\\S*?[0-9]).{8,})\\\\S$",
+            message = "Password must have at least 6 characters: at least 1 uppercase letter, 1 lowercase letter, " +
+                    "and 1 number with no spaces.")
     private String password;
 
     @NotNull(message = "Must have phone number.")

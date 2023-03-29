@@ -1,8 +1,7 @@
-package HealthAPI.dto.TimeSlot;
+package HealthAPI.dto.timeSlot;
 
 import lombok.*;
 
-import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 
 @Builder
@@ -10,6 +9,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TimeSlotDto {
+
+    private Long id;
 
     private LocalDateTime startTime;
 

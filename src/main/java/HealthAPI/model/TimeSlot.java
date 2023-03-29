@@ -3,7 +3,6 @@ package HealthAPI.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 
 @Data
@@ -31,9 +30,5 @@ public class TimeSlot {
     private Appointment appointment;
 
     private boolean isBooked;
-
-    public DayOfWeek getDayOfWeek() {
-        return startTime.getDayOfWeek();
-    }
 
 }

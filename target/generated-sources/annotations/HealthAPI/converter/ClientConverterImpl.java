@@ -1,10 +1,10 @@
 package HealthAPI.converter;
 
-import HealthAPI.dto.AddressDto;
-import HealthAPI.dto.AddressDto.AddressDtoBuilder;
-import HealthAPI.dto.Client.ClientDto;
-import HealthAPI.dto.Client.ClientDto.ClientDtoBuilder;
-import HealthAPI.dto.RegisterRequest;
+import HealthAPI.dto.auth.RegisterRequest;
+import HealthAPI.dto.client.AddressDto;
+import HealthAPI.dto.client.AddressDto.AddressDtoBuilder;
+import HealthAPI.dto.client.ClientDto;
+import HealthAPI.dto.client.ClientDto.ClientDtoBuilder;
 import HealthAPI.model.Address;
 import HealthAPI.model.Address.AddressBuilder;
 import HealthAPI.model.Client;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-03-28T19:55:44+0100",
+    date = "2023-03-29T15:51:32+0100",
     comments = "version: 1.4.1.Final, compiler: javac, environment: Java 19.0.1 (Oracle Corporation)"
 )
 @Component

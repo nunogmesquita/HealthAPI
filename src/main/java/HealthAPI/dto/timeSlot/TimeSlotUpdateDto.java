@@ -1,4 +1,4 @@
-package HealthAPI.dto.TimeSlot;
+package HealthAPI.dto.timeSlot;
 
 import lombok.*;
 

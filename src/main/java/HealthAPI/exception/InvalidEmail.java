@@ -7,4 +7,5 @@ public class InvalidEmail extends RuntimeException {
     public InvalidEmail() {
         super(Responses.INVALID_EMAIL);
     }
+
 }

@@ -2,50 +2,34 @@ package HealthAPI.service;
 
 import HealthAPI.converter.AddressConverter;
 import HealthAPI.converter.ClientConverter;
-import HealthAPI.dto.Client.ClientDto;
-import HealthAPI.dto.RegisterRequest;
+import HealthAPI.dto.client.ClientDto;
+import HealthAPI.dto.auth.RegisterRequest;
+import HealthAPI.exception.ClientNotFound;
+import HealthAPI.messages.Responses;
 import HealthAPI.model.Client;
 import HealthAPI.repository.ClientRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ClientService {
 
     private final ClientRepository clientRepository;
     private final ClientConverter clientConverter;
     private final AddressConverter addressConverter;
 
-    @Autowired
-    public ClientService(ClientRepository clientRepository, ClientConverter clientConverter, AddressConverter addressConverter) {
-        this.clientRepository = clientRepository;
-        this.clientConverter = clientConverter;
-        this.addressConverter = addressConverter;
-    }
-
-    public ClientDto getClientByToken(String jwt) {
-        Client client = clientRepository.findByTokens(jwt);
-        return clientConverter.fromClientToClientDto(client);
-    }
-
     public void deleteClient(Long clientId) {
-        Client client = clientRepository.findById(clientId).orElseThrow();
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new ClientNotFound(Responses.CLIENT_NOT_FOUND.formatted(clientId)));
         client.markAsDeleted();
         clientRepository.save(client);
     }
 
-    public List<ClientDto> getAllClients() {
-        List<Client> clients = clientRepository.findByDeleted(false);
-        return clients.parallelStream()
-                .map(clientConverter::fromClientToClientDto)
-                .toList();
-    }
-
-    public ClientDto updateClient(Long id, RegisterRequest registerRequest) {
-        Client client = clientRepository.getReferenceById(id);
+    public ClientDto updateClient(Long clientId, RegisterRequest registerRequest) {
+        Client client = clientRepository.getReferenceById(clientId);
         client.setFullName(registerRequest.getFullName());
         client.setPhoneNumber(registerRequest.getPhoneNumber());
         client.setEmail(registerRequest.getEmail());
@@ -58,11 +42,23 @@ public class ClientService {
         return clientConverter.fromClientToClientDto(client);
     }
 
-    @Cacheable(value = "clientCache")
-    public ClientDto getClientById(Long id) {
-        Client client = clientRepository.findByIdAndDeleted(id, false)
-                .orElseThrow();
+    public ClientDto getClientByEmail(String clientEmail) {
+        Client client = clientRepository.findByEmail(clientEmail)
+                .orElseThrow(() -> new ClientNotFound(Responses.CLIENT_NOT_FOUND.formatted(clientEmail)));
         return clientConverter.fromClientToClientDto(client);
+    }
+
+    public ClientDto getClientById(Long clientId) {
+        Client client = clientRepository.findByIdAndDeletedFalse(clientId)
+                .orElseThrow(() -> new ClientNotFound(Responses.CLIENT_NOT_FOUND.formatted(clientId)));
+        return clientConverter.fromClientToClientDto(client);
+    }
+
+    public List<ClientDto> getAllClients() {
+        List<Client> clients = clientRepository.findByDeletedFalse();
+        return clients.parallelStream()
+                .map(clientConverter::fromClientToClientDto)
+                .toList();
     }
 
 }

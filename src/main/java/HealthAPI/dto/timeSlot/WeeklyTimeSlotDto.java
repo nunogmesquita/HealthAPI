@@ -1,4 +1,4 @@
-package HealthAPI.dto.TimeSlot;
+package HealthAPI.dto.timeSlot;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -18,20 +18,20 @@ import java.util.List;
 public class WeeklyTimeSlotDto {
 
     @NotBlank
-    LocalDate date;
+    private LocalDate date;
 
     @NotBlank
-    LocalTime initialHour;
+    private LocalTime initialHour;
 
     @NotBlank
-    LocalTime finishingHour;
+    private LocalTime finishingHour;
 
     @NotBlank
-    List<DayOfWeek> dayOfWeeks;
+    private List<DayOfWeek> dayOfWeeks;
 
-    List<String> excludedTimeRanges;
+    private List<String> excludedTimeRanges;
 
     @NotBlank
-    Long userId;
+    private Long userId;
 
 }

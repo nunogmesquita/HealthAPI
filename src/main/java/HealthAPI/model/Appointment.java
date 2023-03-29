@@ -26,6 +26,6 @@ public class Appointment {
 
     @Column
     @Enumerated(EnumType.STRING)
-    Status STATUS;
+    Status status;
 
 }

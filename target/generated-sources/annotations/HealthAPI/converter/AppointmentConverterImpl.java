@@ -1,9 +1,7 @@
 package HealthAPI.converter;
 
-import HealthAPI.dto.AppointmentCreateDto;
-import HealthAPI.dto.AppointmentCreateDto.AppointmentCreateDtoBuilder;
-import HealthAPI.dto.AppointmentDto;
-import HealthAPI.dto.AppointmentDto.AppointmentDtoBuilder;
+import HealthAPI.dto.appointment.AppointmentDto;
+import HealthAPI.dto.appointment.AppointmentDto.AppointmentDtoBuilder;
 import HealthAPI.model.Appointment;
 import HealthAPI.model.Appointment.AppointmentBuilder;
 import HealthAPI.model.Client;
@@ -14,39 +12,16 @@ import HealthAPI.model.TimeSlot.TimeSlotBuilder;
 import HealthAPI.model.User;
 import HealthAPI.model.User.UserBuilder;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-03-28T16:57:08+0100",
+    date = "2023-03-29T15:51:30+0100",
     comments = "version: 1.4.1.Final, compiler: javac, environment: Java 19.0.1 (Oracle Corporation)"
 )
 @Component
 public class AppointmentConverterImpl implements AppointmentConverter {
-
-    @Override
-    public Appointment fromAppointmentCreateDtoToAppointment(AppointmentCreateDto appointmentCreateDto) {
-        if ( appointmentCreateDto == null ) {
-            return null;
-        }
-
-        AppointmentBuilder appointment = Appointment.builder();
-
-        return appointment.build();
-    }
-
-    @Override
-    public AppointmentCreateDto fromAppointmentToAppointmentCreateDto(Appointment appointment) {
-        if ( appointment == null ) {
-            return null;
-        }
-
-        AppointmentCreateDtoBuilder appointmentCreateDto = AppointmentCreateDto.builder();
-
-        return appointmentCreateDto.build();
-    }
 
     @Override
     public AppointmentDto fromAppointmentToAppointmentDto(Appointment appointment) {
@@ -57,17 +32,13 @@ public class AppointmentConverterImpl implements AppointmentConverter {
         AppointmentDtoBuilder appointmentDto = AppointmentDto.builder();
 
         appointmentDto.professional( appointmentUserFirstName( appointment ) );
-        appointmentDto.year( appointmentTimeSlotYear( appointment ) );
-        appointmentDto.month( appointmentTimeSlotMonth( appointment ) );
-        LocalDateTime startTime = appointmentTimeSlotStartTime( appointment );
-        if ( startTime != null ) {
-            appointmentDto.hour( DateTimeFormatter.ISO_LOCAL_DATE_TIME.format( startTime ) );
-        }
-        appointmentDto.client( appointmentClientEmail( appointment ) );
         Speciality speciality = appointmentUserSpeciality( appointment );
         if ( speciality != null ) {
             appointmentDto.speciality( speciality.name() );
         }
+        appointmentDto.client( appointmentClientEmail( appointment ) );
+        appointmentDto.date( appointmentTimeSlotStartTime( appointment ) );
+        appointmentDto.status( appointment.getStatus() );
 
         return appointmentDto.build();
     }
@@ -81,8 +52,9 @@ public class AppointmentConverterImpl implements AppointmentConverter {
         AppointmentBuilder appointment = Appointment.builder();
 
         appointment.user( appointmentDtoToUser( appointmentDto ) );
-        appointment.timeSlot( appointmentDtoToTimeSlot( appointmentDto ) );
         appointment.client( appointmentDtoToClient( appointmentDto ) );
+        appointment.timeSlot( appointmentDtoToTimeSlot( appointmentDto ) );
+        appointment.status( appointmentDto.getStatus() );
 
         return appointment.build();
     }
@@ -102,43 +74,19 @@ public class AppointmentConverterImpl implements AppointmentConverter {
         return firstName;
     }
 
-    private int appointmentTimeSlotYear(Appointment appointment) {
-        if ( appointment == null ) {
-            return 0;
-        }
-        TimeSlot timeSlot = appointment.getTimeSlot();
-        if ( timeSlot == null ) {
-            return 0;
-        }
-        int year = timeSlot.getYear();
-        return year;
-    }
-
-    private int appointmentTimeSlotMonth(Appointment appointment) {
-        if ( appointment == null ) {
-            return 0;
-        }
-        TimeSlot timeSlot = appointment.getTimeSlot();
-        if ( timeSlot == null ) {
-            return 0;
-        }
-        int month = timeSlot.getMonth();
-        return month;
-    }
-
-    private LocalDateTime appointmentTimeSlotStartTime(Appointment appointment) {
+    private Speciality appointmentUserSpeciality(Appointment appointment) {
         if ( appointment == null ) {
             return null;
         }
-        TimeSlot timeSlot = appointment.getTimeSlot();
-        if ( timeSlot == null ) {
+        User user = appointment.getUser();
+        if ( user == null ) {
             return null;
         }
-        LocalDateTime startTime = timeSlot.getStartTime();
-        if ( startTime == null ) {
+        Speciality speciality = user.getSpeciality();
+        if ( speciality == null ) {
             return null;
         }
-        return startTime;
+        return speciality;
     }
 
     private String appointmentClientEmail(Appointment appointment) {
@@ -156,19 +104,19 @@ public class AppointmentConverterImpl implements AppointmentConverter {
         return email;
     }
 
-    private Speciality appointmentUserSpeciality(Appointment appointment) {
+    private LocalDateTime appointmentTimeSlotStartTime(Appointment appointment) {
         if ( appointment == null ) {
             return null;
         }
-        User user = appointment.getUser();
-        if ( user == null ) {
+        TimeSlot timeSlot = appointment.getTimeSlot();
+        if ( timeSlot == null ) {
             return null;
         }
-        Speciality speciality = user.getSpeciality();
-        if ( speciality == null ) {
+        LocalDateTime startTime = timeSlot.getStartTime();
+        if ( startTime == null ) {
             return null;
         }
-        return speciality;
+        return startTime;
     }
 
     protected User appointmentDtoToUser(AppointmentDto appointmentDto) {
@@ -186,22 +134,6 @@ public class AppointmentConverterImpl implements AppointmentConverter {
         return user.build();
     }
 
-    protected TimeSlot appointmentDtoToTimeSlot(AppointmentDto appointmentDto) {
-        if ( appointmentDto == null ) {
-            return null;
-        }
-
-        TimeSlotBuilder timeSlot = TimeSlot.builder();
-
-        timeSlot.year( appointmentDto.getYear() );
-        timeSlot.month( appointmentDto.getMonth() );
-        if ( appointmentDto.getHour() != null ) {
-            timeSlot.startTime( LocalDateTime.parse( appointmentDto.getHour() ) );
-        }
-
-        return timeSlot.build();
-    }
-
     protected Client appointmentDtoToClient(AppointmentDto appointmentDto) {
         if ( appointmentDto == null ) {
             return null;
@@ -212,5 +144,17 @@ public class AppointmentConverterImpl implements AppointmentConverter {
         client.email( appointmentDto.getClient() );
 
         return client.build();
+    }
+
+    protected TimeSlot appointmentDtoToTimeSlot(AppointmentDto appointmentDto) {
+        if ( appointmentDto == null ) {
+            return null;
+        }
+
+        TimeSlotBuilder timeSlot = TimeSlot.builder();
+
+        timeSlot.startTime( appointmentDto.getDate() );
+
+        return timeSlot.build();
     }
 }

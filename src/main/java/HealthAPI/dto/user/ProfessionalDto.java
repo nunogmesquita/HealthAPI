@@ -1,6 +1,5 @@
-package HealthAPI.dto.User;
+package HealthAPI.dto.user;
 
-import HealthAPI.model.Speciality;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

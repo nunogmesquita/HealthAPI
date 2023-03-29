@@ -1,11 +1,9 @@
 package HealthAPI.converter;
 
-import HealthAPI.dto.Client.ClientDto;
-import HealthAPI.dto.RegisterRequest;
+import HealthAPI.dto.client.ClientDto;
+import HealthAPI.dto.auth.RegisterRequest;
 import HealthAPI.model.Client;
-import lombok.Builder;
 import org.mapstruct.Mapper;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Mapper
 public interface ClientConverter {
@@ -15,6 +13,5 @@ public interface ClientConverter {
     ClientDto fromClientToClientDto(Client client);
 
     Client fromAuthenticationRequestToClient(RegisterRequest request);
-
 
 }

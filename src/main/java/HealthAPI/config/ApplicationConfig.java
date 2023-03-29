@@ -1,5 +1,8 @@
 package HealthAPI.config;
 
+import HealthAPI.model.Client;
+import HealthAPI.model.User;
+import HealthAPI.repository.ClientRepository;
 import HealthAPI.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -14,16 +17,28 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Optional;
+
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfig {
 
-    private final UserRepository repository;
+    private final UserRepository userRepository;
+    private final ClientRepository clientRepository;
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> repository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return username -> {
+            Optional<User> user = userRepository.findByEmail(username);
+            if (user.isPresent()) {
+                return user.get();
+            }
+            Optional<Client> client = clientRepository.findByEmail(username);
+            if (client.isPresent()) {
+                return client.get();
+            }
+            throw new UsernameNotFoundException("User not found");
+        };
     }
 
     @Bean

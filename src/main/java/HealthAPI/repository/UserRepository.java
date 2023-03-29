@@ -11,13 +11,11 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
+    List<User> findByRoleAndDeletedFalse(Role healthcareprovider);
+
     Optional<User> findById(Long id);
 
     Optional<User> findByEmail(String username);
-
-    User findByTokens(String jwt);
-
-    List<User> findByRole(Role healthcareprovider);
 
     List<User> findByDeletedFalse();
 
@@ -25,5 +23,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByIdAndDeletedFalse(Long id);
 
-    List<User> findByRoleAndDeleted(Role healthcareprovider, boolean deleted);
 }
