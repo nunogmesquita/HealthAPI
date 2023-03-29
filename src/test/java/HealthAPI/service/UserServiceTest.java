@@ -2,12 +2,8 @@ package HealthAPI.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,7 +11,6 @@ import HealthAPI.converter.UserConverter;
 import HealthAPI.dto.user.UserCreateDto;
 import HealthAPI.dto.user.UserDto;
 import HealthAPI.dto.user.UserUpdateDto;
-import HealthAPI.exception.UserNotFound;
 import HealthAPI.model.Role;
 import HealthAPI.model.Speciality;
 import HealthAPI.model.User;
@@ -25,8 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import java.util.Optional;
-
-import org.junit.jupiter.api.Disabled;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,8 +39,6 @@ class UserServiceTest {
 
     @Autowired
     private UserService userService;
-
-
     @Test
     void testGetAllServices() {
         List<String> actualAllServices = userService.getAllServices();
@@ -66,8 +57,6 @@ class UserServiceTest {
         assertTrue(userService.getAllProfessionals().isEmpty());
         verify(userRepository).findByRoleAndDeletedFalse((Role) any());
     }
-
-
     @Test
     void testCreateUser() {
         when(userRepository.save((User) any())).thenReturn(new User());
@@ -80,7 +69,6 @@ class UserServiceTest {
         verify(userConverter).fromUserToUserDto((User) any());
         verify(userConverter).fromUserCreateDtoToUser((UserCreateDto) any());
     }
-
     @Test
     void testUpdateUser() {
         when(userRepository.save((User) any())).thenReturn(new User());
@@ -100,7 +88,6 @@ class UserServiceTest {
         assertTrue(userService.getAllUsers().isEmpty());
         verify(userRepository).findByDeletedFalse();
     }
-
     @Test
     void testGetUserById() {
         User user = new User();
@@ -116,7 +103,6 @@ class UserServiceTest {
         verify(userRepository).save((User) any());
         verify(userRepository).findByIdAndDeletedFalse((Long) any());
     }
-
     @Test
     void testRestoreUser() {
         when(userRepository.save((User) any())).thenReturn(new User());
@@ -125,5 +111,4 @@ class UserServiceTest {
         verify(userRepository).save((User) any());
         verify(userRepository).findByIdAndDeletedTrue((Long) any());
     }
-
 }
