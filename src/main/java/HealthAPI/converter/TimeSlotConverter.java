@@ -19,4 +19,5 @@ public interface TimeSlotConverter {
     @Mapping(source = "user.firstName", target = "user")
     TimeSlotDto fromTimeSlotToTimeSlotDto(TimeSlot timeSlot);
 
+
 }

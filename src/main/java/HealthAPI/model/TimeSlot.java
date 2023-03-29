@@ -1,10 +1,7 @@
 package HealthAPI.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
@@ -13,6 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
 @Entity
 public class TimeSlot {
 
@@ -24,7 +22,7 @@ public class TimeSlot {
     private LocalDateTime startTime;
 
     @Column(nullable = false)
-    private DayOfWeek dayOfWeek;
+    private String dayOfWeek;
 
     @ManyToOne
     private User user;
@@ -33,5 +31,9 @@ public class TimeSlot {
     private Appointment appointment;
 
     private boolean isBooked;
+
+    public DayOfWeek getDayOfWeek() {
+        return startTime.getDayOfWeek();
+    }
 
 }

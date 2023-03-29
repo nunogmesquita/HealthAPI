@@ -13,10 +13,6 @@ public class TimeSlotDto {
 
     private LocalDateTime startTime;
 
-    private LocalDateTime endTime;
-
-    private DayOfWeek dayOfWeek;
-
     private String user;
 
     private boolean isBooked;

@@ -30,14 +30,8 @@ public class TimeSlotController {
         this.userService = userService;
     }
 
-    @PostMapping("/create/weekly")
-    public ResponseEntity<String> generateWeeklyTimeSlots(@RequestBody WeeklyTimeSlotDto weeklyTimeSlotDto) {
-        timeSlotService.generateWeeklyTimeSlots(weeklyTimeSlotDto);
-        return new ResponseEntity<>(Responses.TIMESLOTS_CREATED, HttpStatus.OK);
-    }
-
     @PostMapping("/create")
-    public ResponseEntity<String> generateTimeSlot(@RequestBody WeeklyTimeSlotDto weeklyTimeSlotDto) {
+    public ResponseEntity<String> generateWeeklyTimeSlots(@RequestBody WeeklyTimeSlotDto weeklyTimeSlotDto) {
         timeSlotService.generateWeeklyTimeSlots(weeklyTimeSlotDto);
         return new ResponseEntity<>(Responses.TIMESLOTS_CREATED, HttpStatus.OK);
     }
@@ -48,17 +42,17 @@ public class TimeSlotController {
         return new ResponseEntity<>(timeSlotDtos, HttpStatus.OK);
     }
 
-    @GetMapping("/available/{userId}")
+    @GetMapping("/available/userId/{userId}")
     public ResponseEntity<List<TimeSlotDto>> getAvailableTimeSlotsByUser(@PathVariable Long userId,
                                                          @RequestParam(defaultValue = "0") int page) {
-        List<TimeSlotDto> timeSlotDtos = timeSlotService.getAvailableTimeSlotsByUser(userId, page, page + 10);
+        List<TimeSlotDto> timeSlotDtos = timeSlotService.getAvailableTimeSlotsByUser(userId, page, 10);
         return new ResponseEntity<>(timeSlotDtos, HttpStatus.OK);
     }
 
     @GetMapping("/available/{speciality}")
     public ResponseEntity<List<TimeSlotDto>> getAvailableTimeSlotsBySpeciality(@PathVariable Speciality speciality,
                                                                @RequestParam(defaultValue = "0") int page) {
-        List<TimeSlotDto> timeSlotDtos = timeSlotService.getAvailableTimeSlotsBySpeciality(speciality, page, page + 10);
+        List<TimeSlotDto> timeSlotDtos = timeSlotService.getAvailableTimeSlotsBySpeciality(speciality, page, 10);
         return new ResponseEntity<>(timeSlotDtos, HttpStatus.OK);
     }
 

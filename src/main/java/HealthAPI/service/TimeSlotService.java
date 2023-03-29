@@ -12,6 +12,7 @@ import HealthAPI.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.*;
@@ -54,19 +55,15 @@ public class TimeSlotService {
                 while (currentDateTime.isBefore(LocalDateTime.of(currentDate, weeklyTimeSlotDto.getFinishingHour()))) {
                     boolean excluded = false;
                     for (LocalTimeRange range : excludedRanges) {
-                        if(range.getStart().equals(currentDateTime.toLocalTime())){
+                        if (range.getStart().equals(currentDateTime.toLocalTime())) {
                             excluded = true;
                             break;
                         }
-//                        if (range.contains(currentDateTime.toLocalTime())) {
-//                            excluded = true;
-//                            break;
-//                        }
                     }
                     if (!excluded) {
                         timeSlots.add(TimeSlot.builder()
                                 .startTime(currentDateTime)
-                                .dayOfWeek(dayOfWeek)
+                                .dayOfWeek(dayOfWeek.toString())
                                 .user(user)
                                 .build());
                     }
@@ -80,7 +77,6 @@ public class TimeSlotService {
         }
     }
 
-
     public List<TimeSlotDto> getAvailableTimeSlots(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         List<TimeSlot> timeSlots = timeSlotRepository.findByIsBookedFalse(pageable).getContent();
@@ -90,7 +86,7 @@ public class TimeSlotService {
     }
 
     public List<TimeSlotDto> getAvailableTimeSlotsByUser(Long userId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("startTime").ascending());
         List<TimeSlot> timeSlots = timeSlotRepository.findByUserAndIsBookedFalse(userId, pageable).getContent();
         return timeSlots.parallelStream()
                 .map(timeSlotConverter::fromTimeSlotToTimeSlotDto)
@@ -98,12 +94,11 @@ public class TimeSlotService {
     }
 
     public List<TimeSlotDto> getAvailableTimeSlotsBySpeciality(Speciality speciality, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("startTime").ascending());
         List<TimeSlot> timeSlots = timeSlotRepository.findByUser_SpecialityAndIsBookedFalse(speciality, pageable).getContent();
         return timeSlots.parallelStream()
                 .map(timeSlotConverter::fromTimeSlotToTimeSlotDto)
                 .toList();
-
     }
 
     public void deleteAllTimeSlotsByUser(Long userId) {
@@ -119,7 +114,7 @@ public class TimeSlotService {
                 .orElseThrow(() -> new ResourceNotFoundException("TimeSlot", "id", id));
 
         existingTimeSlot.setStartTime(updatedTimeSlot.getTime());
-        existingTimeSlot.setDayOfWeek(updatedTimeSlot.getDayOfWeek());
+        existingTimeSlot.setDayOfWeek(updatedTimeSlot.getDayOfWeek().toString());
         timeSlotRepository.save(existingTimeSlot);
         return timeSlotConverter.fromTimeSlotToTimeSlotDto(existingTimeSlot);
     }
