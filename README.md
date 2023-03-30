@@ -2,8 +2,8 @@ HealthAPI: Health for Sickness Clinic - Spring Boot Project
 
 
 **[MindSwap Bootcamp's](https://mindswap.academy/)** 
-created by **[Nuno Mesquita](https://github.com/nunogmesquita/)**,
-**[Susana Gandra](https://github.com/susanagandra/)** 
+created by **[Nuno Mesquita](https://github.com/nunogmesquita/)** and
+**[Susana Gandra](https://github.com/susanagandra/)**.
 This is a Java Spring Boot project that uses MySQL and Redis to build a web application.
 This API as designed to allow searching for services and specialties of a given clinic, as well as 
 scheduling appointments.
