@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-03-30T12:51:15+0100",
+    date = "2023-03-30T22:33:33+0100",
     comments = "version: 1.4.1.Final, compiler: javac, environment: Java 19.0.1 (Oracle Corporation)"
 )
 @Component
@@ -77,7 +77,6 @@ public class ClientConverterImpl implements ClientConverter {
         client.birthDate( request.getBirthDate() );
         client.gender( request.getGender() );
         client.NIF( request.getNIF() );
-        client.address( addressDtoToAddress( request.getAddress() ) );
 
         return client.build();
     }

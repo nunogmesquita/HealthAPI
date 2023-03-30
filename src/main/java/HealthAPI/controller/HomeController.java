@@ -1,7 +1,7 @@
 package HealthAPI.controller;
 
 import HealthAPI.dto.user.ProfessionalDto;
-import HealthAPI.service.UserService;
+import HealthAPI.service.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpHeaders;
@@ -20,7 +20,7 @@ import java.util.List;
 
 public class HomeController {
 
-    private final UserService userService;
+    private final UserServiceImpl userService;
 
     @GetMapping("")
     public ResponseEntity<byte[]> getHomepage() throws IOException {

@@ -13,17 +13,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserUpdateDto {
 
+    @Pattern(regexp = "^[A-Za-z]+$", message = "Please insert a valid first name.")
     private String firstName;
 
+    @Pattern(regexp = "^[A-Za-z]+$", message = "Please insert a valid last name.")
     private String lastName;
 
     @Pattern(regexp = "^((?!\\.)[\\w-_.]*[^.])(@\\w+)(\\.\\w+(\\.\\w+)?[^.\\W])$",
             message = "Please insert a valid email.")
     private String email;
 
-    @Pattern(regexp = "^((?=\\\\S*?[A-Z])(?=\\\\S*?[a-z])(?=\\\\S*?[0-9]).{8,})\\\\S$",
+    @Pattern(regexp = "^(?=.*[~!@#$%^&*()_+`\\-=\\[\\]\\{\\};':\\\",./<>?])(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])\\S{6,}$",
             message = "Password must have at least 8 characters: at least 1 uppercase letter, 1 lowercase letter, " +
-                    "and 1 number with no spaces.")
+                    "1 number and 1 special character.")
     private String password;
 
     private Speciality speciality;

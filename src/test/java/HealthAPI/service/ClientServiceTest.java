@@ -26,7 +26,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ContextConfiguration(classes = {ClientService.class})
+@ContextConfiguration(classes = {ClientServiceImpl.class})
 @ExtendWith(SpringExtension.class)
 class ClientServiceTest {
     @MockBean
@@ -39,7 +39,7 @@ class ClientServiceTest {
     private ClientRepository clientRepository;
 
     @Autowired
-    private ClientService clientService;
+    private ClientServiceImpl clientService;
 
     @Test
     void testDeleteClient() {

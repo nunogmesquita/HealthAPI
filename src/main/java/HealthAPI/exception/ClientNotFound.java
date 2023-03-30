@@ -1,9 +1,11 @@
 package HealthAPI.exception;
 
+import HealthAPI.messages.Responses;
+
 public class ClientNotFound extends RuntimeException {
 
-    public ClientNotFound(String message) {
-        super(message);
+    public ClientNotFound() {
+        super(Responses.CLIENT_NOT_FOUND);
     }
 
 }

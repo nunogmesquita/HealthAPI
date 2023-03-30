@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class TimeSlot {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
     @Column(nullable = false)

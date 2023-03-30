@@ -10,9 +10,6 @@ import lombok.*;
 public class AppointmentCreateDto {
 
     @NotNull
-    private Long userId;
-
-    @NotNull
     private Long timeSlotId;
 
 }

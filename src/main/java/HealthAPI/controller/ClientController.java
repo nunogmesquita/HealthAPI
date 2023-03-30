@@ -2,15 +2,16 @@ package HealthAPI.controller;
 
 import HealthAPI.dto.client.ClientDto;
 import HealthAPI.dto.client.ClientUpdateDto;
+import HealthAPI.exception.UnauthorizedAction;
 import HealthAPI.messages.Responses;
-import HealthAPI.service.ClientService;
+import HealthAPI.service.ClientServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,8 +21,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ClientController {
 
-    private final ClientService clientService;
+    private final ClientServiceImpl clientService;
 
+    @Secured({"ROLE_ADMIN"})
     @DeleteMapping("/{clientId}")
     @ResponseStatus(HttpStatus.OK)
     public String deleteAccount(@PathVariable Long clientId) {
@@ -29,6 +31,7 @@ public class ClientController {
         return Responses.DELETED_CLIENT.formatted(clientId);
     }
 
+    @Secured({"ROLE_ADMIN"})
     @PatchMapping("/{clientId}")
     @ResponseStatus(HttpStatus.OK)
     public ClientDto updateAccount(@PathVariable Long clientId,
@@ -36,14 +39,19 @@ public class ClientController {
         return clientService.updateClient(clientId, clientUpdateDto);
     }
 
+    @Secured("ROLE_VIEWER")
     @GetMapping("/myaccount")
     @ResponseStatus(HttpStatus.OK)
     @Cacheable(value = "viewMyAccount")
     public ClientDto viewMyAccount(@NonNull HttpServletRequest header) {
         String user = header.getUserPrincipal().getName();
+        if (!header.isUserInRole("ROLE_VIEWER")) {
+            throw new UnauthorizedAction();
+        }
         return clientService.getClientByEmail(user);
     }
 
+    @Secured("ROLE_VIEWER")
     @PatchMapping("/myaccount")
     @ResponseStatus(HttpStatus.OK)
     public ClientDto updateMyAccount(@NonNull HttpServletRequest header,
@@ -52,6 +60,7 @@ public class ClientController {
         return clientService.updateClient(clientEmail, clientUpdateDto);
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_HEALTHCAREPROVIDER"})
     @GetMapping("/{clientId}")
     @ResponseStatus(HttpStatus.OK)
     @Cacheable(value = "getClient", key = "#clientId")
@@ -59,7 +68,8 @@ public class ClientController {
         return clientService.getClientById(clientId);
     }
 
-    @GetMapping("/list")
+    @Secured({"ROLE_ADMIN", "ROLE_HEALTHCAREPROVIDER"})
+    @GetMapping("")
     @ResponseStatus(HttpStatus.OK)
     public List<ClientDto> getAllClients() {
         return clientService.getAllClients();

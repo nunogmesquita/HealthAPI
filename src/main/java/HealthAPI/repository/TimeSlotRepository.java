@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Repository
@@ -21,5 +22,9 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
     Optional<TimeSlot> findById(Long id);
 
     void deleteAllByUser_Id(Long userId);
+
+    Optional<TimeSlot> findByStartTimeAndUser_Id(LocalDateTime startTime, Long id);
+
+    Optional<TimeSlot> findByUser_Id(Long userId);
 
 }

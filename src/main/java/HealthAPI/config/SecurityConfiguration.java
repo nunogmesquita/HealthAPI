@@ -21,19 +21,14 @@ public class SecurityConfiguration {
     private final AuthenticationProvider authenticationProvider;
     private final LogoutHandler logoutHandler;
 
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/v3/**", "/swagger-ui/**", "/home/**")
-                    .permitAll()
-                .requestMatchers("/auth/**")
-                    .permitAll()
-                .requestMatchers("/**")
-                    .permitAll()
+                .requestMatchers("/v3/**", "/swagger-ui/**", "/cms/**", "/auth/**")
+                .permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()

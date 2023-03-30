@@ -3,8 +3,6 @@ package HealthAPI.dto.client;
 import HealthAPI.model.Gender;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
@@ -17,8 +15,11 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class ClientUpdateDto {
 
+    @Pattern(regexp = "^[A-Za-z]+$", message = "Please insert a valid name.")
     private String fullName;
 
+    @Pattern(regexp = "^((?!\\.)[\\w-_.]*[^.])(@\\w+)(\\.\\w+(\\.\\w+)?[^.\\W])$",
+            message = "Please insert a valid email.")
     private String email;
 
     @Pattern(regexp = "^(?=.*[~!@#$%^&*()_+`\\-=\\[\\]\\{\\};':\\\",./<>?])(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])\\S{6,}$",
@@ -35,6 +36,6 @@ public class ClientUpdateDto {
 
     private int NIF;
 
-    private AddressDto address;
+    private AddressDto addressDto;
 
 }

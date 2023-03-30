@@ -34,7 +34,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ContextConfiguration(classes = {AppointmentService.class})
+@ContextConfiguration(classes = {AppointmentServiceImpl.class})
 @ExtendWith(SpringExtension.class)
 class AppointmentServiceTest {
     @MockBean
@@ -44,19 +44,19 @@ class AppointmentServiceTest {
     private AppointmentRepository appointmentRepository;
 
     @Autowired
-    private AppointmentService appointmentService;
+    private AppointmentServiceImpl appointmentService;
 
     @MockBean
     private ClientConverter clientConverter;
 
     @MockBean
-    private ClientService clientService;
+    private ClientServiceImpl clientService;
 
     @MockBean
-    private TimeSlotService timeSlotService;
+    private TimeSlotServiceImpl timeSlotService;
 
     @MockBean
-    private UserService userService;
+    private UserServiceImpl userService;
 
     @Test
     void testCreateAppointment() {

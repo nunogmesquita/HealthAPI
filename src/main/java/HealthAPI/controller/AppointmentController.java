@@ -4,14 +4,14 @@ import HealthAPI.dto.appointment.AppointmentCreateDto;
 import HealthAPI.dto.appointment.AppointmentDto;
 import HealthAPI.dto.appointment.AppointmentUpdateDto;
 import HealthAPI.messages.Responses;
-import HealthAPI.service.AppointmentService;
+import HealthAPI.service.AppointmentServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,25 +21,33 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AppointmentController {
 
-    private final AppointmentService appointmentService;
+    private final AppointmentServiceImpl appointmentService;
 
     @PostMapping("")
     @ResponseStatus(HttpStatus.OK)
     public AppointmentDto createAppointment(@NonNull HttpServletRequest request,
-                                                            @Valid @RequestBody AppointmentCreateDto appointmentCreateDto) {
+                                            @Valid @RequestBody AppointmentCreateDto appointmentCreateDto) {
         String clientEmail = request.getUserPrincipal().getName();
-        AppointmentDto appointmentDto = appointmentService.createAppointment(clientEmail, appointmentCreateDto);
-        return appointmentDto;
+        return appointmentService.createAppointment(clientEmail, appointmentCreateDto);
     }
 
+    @Secured("ROLE_VIEWER")
+    @GetMapping("")
+    @ResponseStatus(HttpStatus.OK)
+    public List<AppointmentDto> getMyAppointments(@NonNull HttpServletRequest request) {
+        String clientEmail = request.getUserPrincipal().getName();
+        return appointmentService.findAllByClientEmail(clientEmail);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_HEALTHCAREPROVIDER"})
     @GetMapping("/{appointmentId}")
     @ResponseStatus(HttpStatus.OK)
     @Cacheable(value = "getAppointmentById", key = "#appointmentId")
     public AppointmentDto getAppointmentById(@PathVariable Long appointmentId) {
-        AppointmentDto appointmentDto = appointmentService.findAppointmentById(appointmentId);
-        return appointmentDto;
+        return appointmentService.findAppointmentById(appointmentId);
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_HEALTHCAREPROVIDER"})
     @DeleteMapping("/{appointmentId}")
     @ResponseStatus(HttpStatus.OK)
     public String deleteAppointmentById(@PathVariable Long appointmentId) {
@@ -47,33 +55,33 @@ public class AppointmentController {
         return Responses.DELETED_APPOINTMENT.formatted(appointmentId);
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_HEALTHCAREPROVIDER"})
     @PatchMapping("/{appointmentId}")
     @ResponseStatus(HttpStatus.OK)
     public AppointmentDto updateAppointment(@PathVariable Long appointmentId,
-                                                            @Valid @RequestBody AppointmentUpdateDto updatedAppointment) {
-        AppointmentDto appointmentDto = appointmentService.updateAppointment(appointmentId, updatedAppointment);
-        return appointmentDto;
+                                            @Valid @RequestBody AppointmentUpdateDto updatedAppointment) {
+        return appointmentService.updateAppointment(appointmentId, updatedAppointment);
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_HEALTHCAREPROVIDER"})
     @GetMapping("/listbyuser/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public List<AppointmentDto> getAllAppointmentByUserId(@PathVariable Long userId) {
-        List<AppointmentDto> appointmentList = appointmentService.findAllByUserId(userId);
-        return appointmentList;
+        return appointmentService.findAllByUserId(userId);
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_HEALTHCAREPROVIDER"})
     @GetMapping("/listbyclient/{clientId}")
     @ResponseStatus(HttpStatus.OK)
     public List<AppointmentDto> getAllAppointmentByClientId(@PathVariable Long clientId) {
-        List<AppointmentDto> appointmentList = appointmentService.findAllByClientId(clientId);
-        return appointmentList;
+        return appointmentService.findAllByClientId(clientId);
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_HEALTHCAREPROVIDER"})
     @PostMapping("/{appointmentId}/restore")
     @ResponseStatus(HttpStatus.OK)
     public AppointmentDto restoreById(@PathVariable Long appointmentId) {
-        AppointmentDto appointmentDto = appointmentService.restoreById(appointmentId);
-        return appointmentDto;
+        return appointmentService.restoreById(appointmentId);
     }
 
 }

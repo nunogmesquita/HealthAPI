@@ -1,4 +1,4 @@
-package HealthAPI.model;
+package HealthAPI.service;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,6 +12,7 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LocalTimeRange {
+
     private LocalTime start;
 
     private LocalTime end;
@@ -24,10 +25,6 @@ public class LocalTimeRange {
         LocalTime start = LocalTime.parse(parts[0]);
         LocalTime end = LocalTime.parse(parts[1]);
         return new LocalTimeRange(start, end);
-    }
-
-    public boolean contains(LocalTime time) {
-        return !time.isBefore(start) && !time.isAfter(end);
     }
 
 }

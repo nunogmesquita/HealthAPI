@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -13,24 +12,14 @@ import static org.mockito.Mockito.when;
 
 import HealthAPI.converter.TimeSlotConverter;
 import HealthAPI.converter.UserConverter;
-import HealthAPI.dto.timeSlot.TimeSlotDto;
 import HealthAPI.dto.timeSlot.TimeSlotUpdateDto;
 import HealthAPI.dto.timeSlot.WeeklyTimeSlotDto;
 import HealthAPI.dto.user.UserDto;
-import HealthAPI.exception.ResourceNotFoundException;
 import HealthAPI.model.Speciality;
-import HealthAPI.model.TimeSlot;
-import HealthAPI.model.User;
 import HealthAPI.repository.TimeSlotRepository;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Optional;
-
-import org.junit.jupiter.api.Disabled;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +30,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ContextConfiguration(classes = {TimeSlotService.class})
+@ContextConfiguration(classes = {TimeSlotServiceImpl.class})
 @ExtendWith(SpringExtension.class)
 class TimeSlotServiceTest {
     @MockBean
@@ -54,10 +43,10 @@ class TimeSlotServiceTest {
     private TimeSlotRepository timeSlotRepository;
 
     @Autowired
-    private TimeSlotService timeSlotService;
+    private TimeSlotServiceImpl timeSlotService;
 
     @MockBean
-    private UserService userService;
+    private UserServiceImpl userService;
     @Test
     void testGenerateWeeklyTimeSlots() {
         when(userService.getUserById((Long) any())).thenReturn(new UserDto());

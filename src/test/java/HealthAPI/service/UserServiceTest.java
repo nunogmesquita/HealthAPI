@@ -28,7 +28,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ContextConfiguration(classes = {UserService.class})
+@ContextConfiguration(classes = {UserServiceImpl.class})
 @ExtendWith(SpringExtension.class)
 class UserServiceTest {
     @MockBean
@@ -38,7 +38,7 @@ class UserServiceTest {
     private UserRepository userRepository;
 
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userService;
 
 
     @Test
@@ -55,9 +55,9 @@ class UserServiceTest {
 
     @Test
     void testGetAllProfessionals() {
-        when(userRepository.findByRoleAndDeletedFalse((Role) any())).thenReturn(new ArrayList<>());
+        when(userRepository.findByRoleAndDeleted((Role) any())).thenReturn(new ArrayList<>());
         assertTrue(userService.getAllProfessionals().isEmpty());
-        verify(userRepository).findByRoleAndDeletedFalse((Role) any());
+        verify(userRepository).findByRoleAndDeleted((Role) any());
     }
 
 

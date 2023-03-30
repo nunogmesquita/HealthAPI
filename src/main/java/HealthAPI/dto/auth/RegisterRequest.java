@@ -1,6 +1,5 @@
 package HealthAPI.dto.auth;
 
-import HealthAPI.dto.client.AddressDto;
 import HealthAPI.model.Gender;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -17,6 +16,7 @@ import java.time.LocalDate;
 public class RegisterRequest {
 
     @NotBlank(message = "Must have name.")
+    @Pattern(regexp = "^[A-Za-z]+$", message = "Please insert a valid name.")
     private String fullName;
 
     @NotBlank(message = "Must have email.")
@@ -40,8 +40,20 @@ public class RegisterRequest {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
+    @NotNull(message = "Must have NIF.")
     private int NIF;
 
-    private AddressDto address;
+    @NotBlank(message = "Must have a street.")
+    @Pattern(regexp = "^[A-Za-z]+$", message = "Please insert a valid street.")
+    private String street;
+
+    @NotBlank(message = "Must have a city.")
+    @Pattern(regexp = "^[A-Za-z,]+$", message = "Please insert a valid city.")
+    private String city;
+
+    @NotBlank(message = "Must have a zip code")
+    @Pattern(regexp = "^\\d{4}(-\\d{3})?$",
+            message = "Please insert a valid zipcode.")
+    private String zipCode;
 
 }

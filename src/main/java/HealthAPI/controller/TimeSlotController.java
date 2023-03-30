@@ -5,12 +5,12 @@ import HealthAPI.dto.timeSlot.TimeSlotUpdateDto;
 import HealthAPI.dto.timeSlot.WeeklyTimeSlotDto;
 import HealthAPI.messages.Responses;
 import HealthAPI.model.Speciality;
-import HealthAPI.service.TimeSlotService;
+import HealthAPI.service.TimeSlotServiceImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,15 +20,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TimeSlotController {
 
-    private final TimeSlotService timeSlotService;
+    private final TimeSlotServiceImpl timeSlotService;
 
+    @Secured({"ROLE_ADMIN", "ROLE_HEALTHCAREPROVIDER"})
     @PostMapping("")
     @ResponseStatus(HttpStatus.OK)
-    public String generateWeeklyTimeSlots(@RequestBody WeeklyTimeSlotDto weeklyTimeSlotDto) {
+    public String generateWeeklyTimeSlots(@Valid @RequestBody WeeklyTimeSlotDto weeklyTimeSlotDto) {
         timeSlotService.generateWeeklyTimeSlots(weeklyTimeSlotDto);
         return Responses.TIMESLOTS_CREATED;
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_HEALTHCAREPROVIDER"})
     @DeleteMapping("/{timeSlotId}")
     @ResponseStatus(HttpStatus.OK)
     public String deleteTimeSlot(@PathVariable Long timeSlotId) {
@@ -36,10 +38,11 @@ public class TimeSlotController {
         return Responses.DELETED_TIMESLOT.formatted(timeSlotId);
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_HEALTHCAREPROVIDER"})
     @PatchMapping("/{timeSlotId}")
     @ResponseStatus(HttpStatus.OK)
     public TimeSlotDto updateTimeSlot(@PathVariable Long timeSlotId,
-                                      @RequestBody TimeSlotUpdateDto updatedTimeSlot) {
+                                      @Valid @RequestBody TimeSlotUpdateDto updatedTimeSlot) {
         return timeSlotService.updateTimeSlot(timeSlotId, updatedTimeSlot);
     }
 
@@ -66,6 +69,7 @@ public class TimeSlotController {
         return timeSlotService.getAvailableTimeSlotsBySpeciality(speciality, page, 10);
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_HEALTHCAREPROVIDER"})
     @DeleteMapping("/user/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public String deleteAllTimeSlotsByUser(@PathVariable Long userId) {

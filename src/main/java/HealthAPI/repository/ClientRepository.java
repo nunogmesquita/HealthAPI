@@ -14,8 +14,8 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
 
     Optional<Client> findById(Long id);
 
-    Optional<Client> findByIdAndDeletedFalse(Long id);
+    Optional<Client> findByIdAndDeleted(Long id, boolean deleted);
 
-    List<Client> findByDeletedFalse();
+    List<Client> findByDeleted(boolean deleted);
 
 }

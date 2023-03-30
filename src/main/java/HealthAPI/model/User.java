@@ -3,12 +3,10 @@ package HealthAPI.model;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
@@ -40,7 +38,7 @@ public class User implements UserDetails {
     @Nullable
     private Speciality speciality;
 
-    @Enumerated (EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     private Role role;
 
     @OneToMany
@@ -50,7 +48,7 @@ public class User implements UserDetails {
     private List<TimeSlot> timeSlots;
 
     @OneToMany
-    private List <Token> tokens;
+    private List<Token> tokens;
 
     private boolean deleted;
 

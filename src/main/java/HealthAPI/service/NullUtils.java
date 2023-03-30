@@ -1,4 +1,4 @@
-package HealthAPI.model;
+package HealthAPI.service;
 
 import java.util.function.Consumer;
 

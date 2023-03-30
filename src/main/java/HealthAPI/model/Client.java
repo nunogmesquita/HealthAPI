@@ -6,7 +6,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -52,9 +51,9 @@ public class Client implements UserDetails {
     private List<Appointment> appointments;
 
     @OneToMany
-    private List <Token> tokens;
+    private List<Token> tokens;
 
-    @Enumerated (EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     private Role role;
 
     private boolean deleted;

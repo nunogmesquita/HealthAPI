@@ -10,8 +10,12 @@ import lombok.*;
 @NoArgsConstructor
 public class AddressDto {
 
+    @NotBlank(message = "Must have a street.")
+    @Pattern(regexp = "^[A-Za-z]+$", message = "Please insert a valid street.")
     private String street;
 
+    @NotBlank(message = "Must have a city.")
+    @Pattern(regexp = "^[A-Za-z,]+$", message = "Please insert a valid city.")
     private String city;
 
     @NotBlank(message = "Must have a zip code")

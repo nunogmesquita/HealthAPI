@@ -1,14 +1,17 @@
 HealthAPI: Health for Sickness Clinic - Spring Boot Project
 
 
-**[MindSwap Bootcamp's](https://mindswap.academy/)** 
+**[MindSwap Bootcamp's](https://mindswap.academy/)** project
 created by **[Nuno Mesquita](https://github.com/nunogmesquita/)**,
-**[Susana Gandra](https://github.com/susanagandra/)** 
-This is a Java Spring Boot project that uses MySQL and Redis to build a web application.
-This API as designed to allow searching for services and specialties of a given clinic, as well as 
-scheduling appointments.
+**[Susana Gandra](https://github.com/susanagandra/)**.
 
-### API goals
+This is a Java Spring Boot project that uses MySQL and Redis to build a REST API.
+This API is designed to make CRUD operations within an health appointment system. 
+It also allows the registration and authentication of a given user or client.
+Healthcare providers (aka Users) can create TimeSlots and therefore, our clients can
+schedule appointments for a particular TimeSlot.
+
+### API Tools
 
 > - Model Relationships
 > - Spring Security
@@ -33,6 +36,13 @@ Before running this project, make sure you have the following installed:
 
 1. Clone this repository to your local machine.
 2. Open the project in your favorite IDE.
+
+   `git clone https://github.com/nunogmesquita/HealthAPI.git`
 3. Go to the DockerCompose.yml file.
-   `Run it`
-4. Use Postman or Swagger to make API calls to manage database entries.
+
+   `docker -compose -f docker-compose.yml up`
+4. Start the server
+
+   `npm start -- --port=8080`
+5. Use Postman to make API calls to manage database entries and Swagger 
+further information about the endpoints and schemas.
