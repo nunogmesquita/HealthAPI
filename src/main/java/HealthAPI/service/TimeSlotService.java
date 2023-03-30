@@ -1,9 +1,11 @@
 package HealthAPI.service;
 
 import HealthAPI.converter.TimeSlotConverter;
+import HealthAPI.converter.UserConverter;
 import HealthAPI.dto.timeSlot.TimeSlotDto;
 import HealthAPI.dto.timeSlot.TimeSlotUpdateDto;
 import HealthAPI.dto.timeSlot.WeeklyTimeSlotDto;
+import HealthAPI.dto.user.UserDto;
 import HealthAPI.exception.ResourceNotFoundException;
 import HealthAPI.exception.TimeSlotNotFound;
 import HealthAPI.model.*;
@@ -26,9 +28,11 @@ public class TimeSlotService {
     private final TimeSlotRepository timeSlotRepository;
     private final TimeSlotConverter timeSlotConverter;
     private final UserService userService;
+    private final UserConverter userConverter;
 
     public void generateWeeklyTimeSlots(WeeklyTimeSlotDto weeklyTimeSlotDto) {
-        User user = userService.getUserById(weeklyTimeSlotDto.getUserId());
+        UserDto userDto = userService.getUserById(weeklyTimeSlotDto.getUserId());
+        User user = userConverter.fromUserDtoToUser(userDto);
         LocalDate startDate = weeklyTimeSlotDto.getDate();
         LocalDate endDate = startDate.plusMonths(1);
         List<LocalTimeRange> excludedRanges = new ArrayList<>();

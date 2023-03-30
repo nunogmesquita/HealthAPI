@@ -12,6 +12,7 @@ import HealthAPI.model.Speciality;
 import HealthAPI.model.User;
 import HealthAPI.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -89,9 +90,11 @@ public class UserService {
                 .toList();
     }
 
-    public User getUserById(Long userId) {
-        return userRepository.findByIdAndDeletedFalse(userId)
+    public UserDto getUserById(Long userId) {
+        User user = userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new UserNotFound(Responses.USER_NOT_FOUND.formatted(userId)));
+        return userConverter.fromUserToUserDto(user);
+
     }
 
     public List<UserDto> getAllDeletedUsers() {

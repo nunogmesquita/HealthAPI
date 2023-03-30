@@ -1,13 +1,14 @@
 package HealthAPI.controller;
 
 import HealthAPI.dto.client.ClientDto;
-import HealthAPI.dto.auth.RegisterRequest;
 import HealthAPI.dto.client.ClientUpdateDto;
 import HealthAPI.messages.Responses;
 import HealthAPI.service.ClientService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
@@ -22,43 +23,46 @@ public class ClientController {
     private final ClientService clientService;
 
     @DeleteMapping("/{clientId}")
-    public ResponseEntity<String> deleteAccount(@PathVariable Long clientId) {
+    @ResponseStatus(HttpStatus.OK)
+    public String deleteAccount(@PathVariable Long clientId) {
         clientService.deleteClient(clientId);
-        return ResponseEntity.ok(Responses.DELETED_CLIENT.formatted(clientId));
+        return Responses.DELETED_CLIENT.formatted(clientId);
     }
 
     @PatchMapping("/{clientId}")
-    public ResponseEntity<ClientDto> updateAccount(@PathVariable Long clientId,
-                                                   @Valid @RequestBody ClientUpdateDto clientUpdateDto) {
-        ClientDto clientDto = clientService.updateClient(clientId, clientUpdateDto);
-        return ResponseEntity.ok(clientDto);
+    @ResponseStatus(HttpStatus.OK)
+    public ClientDto updateAccount(@PathVariable Long clientId,
+                                   @Valid @RequestBody ClientUpdateDto clientUpdateDto) {
+        return clientService.updateClient(clientId, clientUpdateDto);
     }
 
     @GetMapping("/myaccount")
-    public ResponseEntity<ClientDto> viewMyAccount(@NonNull HttpServletRequest header) {
+    @ResponseStatus(HttpStatus.OK)
+    @Cacheable(value = "viewMyAccount")
+    public ClientDto viewMyAccount(@NonNull HttpServletRequest header) {
         String user = header.getUserPrincipal().getName();
-        ClientDto clientDto = clientService.getClientByEmail(user);
-        return ResponseEntity.ok(clientDto);
+        return clientService.getClientByEmail(user);
     }
 
     @PatchMapping("/myaccount")
-    public ResponseEntity<ClientDto> updateMyAccount(@NonNull HttpServletRequest header,
-                                                     @Valid @RequestBody ClientUpdateDto clientUpdateDto) {
+    @ResponseStatus(HttpStatus.OK)
+    public ClientDto updateMyAccount(@NonNull HttpServletRequest header,
+                                     @Valid @RequestBody ClientUpdateDto clientUpdateDto) {
         String clientEmail = header.getUserPrincipal().getName();
-        ClientDto updatedClient = clientService.updateClient(clientEmail, clientUpdateDto);
-        return ResponseEntity.ok(updatedClient);
+        return clientService.updateClient(clientEmail, clientUpdateDto);
     }
 
-    @GetMapping("/view/{clientId}")
-    public ResponseEntity<ClientDto> getClient(@PathVariable Long clientId) {
-        ClientDto client = clientService.getClientById(clientId);
-        return ResponseEntity.ok(client);
+    @GetMapping("/{clientId}")
+    @ResponseStatus(HttpStatus.OK)
+    @Cacheable(value = "getClient", key = "#clientId")
+    public ClientDto getClient(@PathVariable Long clientId) {
+        return clientService.getClientById(clientId);
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<ClientDto>> getAllClients() {
-        List<ClientDto> clients = clientService.getAllClients();
-        return ResponseEntity.ok(clients);
+    @ResponseStatus(HttpStatus.OK)
+    public List<ClientDto> getAllClients() {
+        return clientService.getAllClients();
     }
 
 }

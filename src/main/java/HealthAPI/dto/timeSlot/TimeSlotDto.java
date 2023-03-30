@@ -2,13 +2,14 @@ package HealthAPI.dto.timeSlot;
 
 import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Builder
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TimeSlotDto {
+public class TimeSlotDto implements Serializable {
 
     private Long id;
 

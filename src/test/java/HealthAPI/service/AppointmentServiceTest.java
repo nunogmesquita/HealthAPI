@@ -14,6 +14,7 @@ import HealthAPI.dto.appointment.AppointmentCreateDto;
 import HealthAPI.dto.appointment.AppointmentDto;
 import HealthAPI.dto.appointment.AppointmentUpdateDto;
 import HealthAPI.dto.client.ClientDto;
+import HealthAPI.dto.user.UserDto;
 import HealthAPI.exception.AppointmentAlreadyActive;
 import HealthAPI.model.Appointment;
 import HealthAPI.model.Client;
@@ -60,7 +61,7 @@ class AppointmentServiceTest {
     @Test
     void testCreateAppointment() {
         when(appointmentRepository.save((Appointment) any())).thenReturn(new Appointment());
-        when(userService.getUserById((Long) any())).thenReturn(new User());
+        when(userService.getUserById((Long) any())).thenReturn(new UserDto());
         when(clientService.getClientByEmail((String) any())).thenReturn(new ClientDto());
         when(timeSlotService.getTimeSlotById((Long) any())).thenReturn(new TimeSlot());
         AppointmentDto appointmentDto = new AppointmentDto();
@@ -98,7 +99,7 @@ class AppointmentServiceTest {
         when(appointmentRepository.save((Appointment) any())).thenReturn(new Appointment());
         when(appointmentRepository.findByIdAndStatus((Long) any(), (Status) any()))
                 .thenReturn(Optional.of(new Appointment()));
-        when(userService.getUserById((Long) any())).thenReturn(new User());
+        when(userService.getUserById((Long) any())).thenReturn(new UserDto());
         when(timeSlotService.getTimeSlotById((Long) any())).thenReturn(new TimeSlot());
         AppointmentDto appointmentDto = new AppointmentDto();
         when(appointmentConverter.fromAppointmentToAppointmentDto((Appointment) any())).thenReturn(appointmentDto);

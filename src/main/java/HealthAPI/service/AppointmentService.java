@@ -2,10 +2,12 @@ package HealthAPI.service;
 
 import HealthAPI.converter.AppointmentConverter;
 import HealthAPI.converter.ClientConverter;
+import HealthAPI.converter.UserConverter;
 import HealthAPI.dto.appointment.AppointmentCreateDto;
 import HealthAPI.dto.appointment.AppointmentDto;
 import HealthAPI.dto.appointment.AppointmentUpdateDto;
 import HealthAPI.dto.client.ClientDto;
+import HealthAPI.dto.user.UserDto;
 import HealthAPI.exception.AppointmentAlreadyActive;
 import HealthAPI.exception.AppointmentAlreadyInactive;
 import HealthAPI.exception.AppointmentNotFound;
@@ -26,9 +28,11 @@ public class AppointmentService {
     private final TimeSlotService timeSlotService;
     private final AppointmentConverter appointmentConverter;
     private final ClientConverter clientConverter;
+    private final UserConverter userConverter;
 
     public AppointmentDto createAppointment(String clientEmail, AppointmentCreateDto appointmentCreateDto) {
-        User user = userService.getUserById(appointmentCreateDto.getUserId());
+        UserDto userDto = userService.getUserById(appointmentCreateDto.getUserId());
+        User user = userConverter.fromUserDtoToUser(userDto);
         TimeSlot timeSlot = timeSlotService.getTimeSlotById(appointmentCreateDto.getTimeSlotId());
         ClientDto clientDto = clientService.getClientByEmail(clientEmail);
         Appointment appointment = Appointment.builder()
@@ -57,7 +61,7 @@ public class AppointmentService {
 
     public AppointmentDto updateAppointment(Long appointmentId, AppointmentUpdateDto appointmentUpdateDto) {
         Appointment appointmentToUpdate = appointmentConverter.fromAppointmentDtoAppointment(findAppointmentById(appointmentId));
-        NullUtils.updateIfPresent(appointmentToUpdate::setUser, userService.getUserById(appointmentUpdateDto.getUserId()));
+        NullUtils.updateIfPresent(appointmentToUpdate::setUser, userConverter.fromUserDtoToUser(userService.getUserById(appointmentUpdateDto.getUserId())));
         NullUtils.updateIfPresent(appointmentToUpdate::setTimeSlot, timeSlotService.getTimeSlotById(appointmentUpdateDto.getTimeSlotId()));
         appointmentRepository.save(appointmentToUpdate);
         return appointmentConverter.fromAppointmentToAppointmentDto(appointmentToUpdate);

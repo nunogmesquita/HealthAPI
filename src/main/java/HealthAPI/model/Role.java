@@ -3,6 +3,7 @@ package HealthAPI.model;
 public enum Role {
 
     ADMIN,
-    HEALTHCAREPROVIDER
+    HEALTHCAREPROVIDER,
+    VIEWER
 
 }

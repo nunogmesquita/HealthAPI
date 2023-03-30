@@ -1,5 +1,6 @@
 package HealthAPI.service;
 
+import HealthAPI.config.JwtService;
 import HealthAPI.converter.ClientConverter;
 import HealthAPI.dto.auth.AuthenticationRequest;
 import HealthAPI.dto.auth.AuthenticationResponse;
@@ -71,6 +72,7 @@ public class AuthenticationService {
         }
         Address address = addressService.saveAddress(request.getAddress());
         Client client = clientConverter.fromAuthenticationRequestToClient(request);
+        client.setRole(Role.VIEWER);
         client.setPassword(passwordEncoder.encode(request.getPassword()));
         client.setAddress(address);
         clientRepository.save(client);

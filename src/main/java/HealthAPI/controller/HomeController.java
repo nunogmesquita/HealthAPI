@@ -15,7 +15,7 @@ import java.io.InputStream;
 import java.util.List;
 
 @RestController
-@RequestMapping("/home")
+@RequestMapping("/cms")
 @RequiredArgsConstructor
 
 public class HomeController {
@@ -32,15 +32,15 @@ public class HomeController {
     }
 
     @GetMapping("/services")
-    public ResponseEntity<List<String>> getServices() {
-        List<String> services = userService.getAllServices();
-        return ResponseEntity.ok(services);
+    @ResponseStatus(HttpStatus.OK)
+    public List<String> getServices() {
+        return userService.getAllServices();
     }
 
     @GetMapping("/professionals")
-    public ResponseEntity<List<ProfessionalDto>> getProfessionals() {
-        List<ProfessionalDto> professionals = userService.getAllProfessionals();
-        return ResponseEntity.ok(professionals);
+    @ResponseStatus(HttpStatus.OK)
+    public List<ProfessionalDto> getProfessionals() {
+        return userService.getAllProfessionals();
     }
 
 }

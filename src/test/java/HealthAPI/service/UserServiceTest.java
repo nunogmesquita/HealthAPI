@@ -39,6 +39,8 @@ class UserServiceTest {
 
     @Autowired
     private UserService userService;
+
+
     @Test
     void testGetAllServices() {
         List<String> actualAllServices = userService.getAllServices();
@@ -57,6 +59,8 @@ class UserServiceTest {
         assertTrue(userService.getAllProfessionals().isEmpty());
         verify(userRepository).findByRoleAndDeletedFalse((Role) any());
     }
+
+
     @Test
     void testCreateUser() {
         when(userRepository.save((User) any())).thenReturn(new User());
@@ -69,6 +73,7 @@ class UserServiceTest {
         verify(userConverter).fromUserToUserDto((User) any());
         verify(userConverter).fromUserCreateDtoToUser((UserCreateDto) any());
     }
+
     @Test
     void testUpdateUser() {
         when(userRepository.save((User) any())).thenReturn(new User());
@@ -88,6 +93,7 @@ class UserServiceTest {
         assertTrue(userService.getAllUsers().isEmpty());
         verify(userRepository).findByDeletedFalse();
     }
+
     @Test
     void testGetUserById() {
         User user = new User();
@@ -103,6 +109,7 @@ class UserServiceTest {
         verify(userRepository).save((User) any());
         verify(userRepository).findByIdAndDeletedFalse((Long) any());
     }
+
     @Test
     void testRestoreUser() {
         when(userRepository.save((User) any())).thenReturn(new User());
@@ -111,4 +118,5 @@ class UserServiceTest {
         verify(userRepository).save((User) any());
         verify(userRepository).findByIdAndDeletedTrue((Long) any());
     }
+
 }

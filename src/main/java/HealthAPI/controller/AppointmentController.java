@@ -8,6 +8,7 @@ import HealthAPI.service.AppointmentService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -22,49 +23,57 @@ public class AppointmentController {
 
     private final AppointmentService appointmentService;
 
-    @PostMapping("/register")
-    public ResponseEntity<AppointmentDto> createAppointment(@NonNull HttpServletRequest request,
+    @PostMapping("")
+    @ResponseStatus(HttpStatus.OK)
+    public AppointmentDto createAppointment(@NonNull HttpServletRequest request,
                                                             @Valid @RequestBody AppointmentCreateDto appointmentCreateDto) {
         String clientEmail = request.getUserPrincipal().getName();
         AppointmentDto appointmentDto = appointmentService.createAppointment(clientEmail, appointmentCreateDto);
-        return ResponseEntity.ok(appointmentDto);
+        return appointmentDto;
     }
 
     @GetMapping("/{appointmentId}")
-    public ResponseEntity<AppointmentDto> getAppointmentById(@PathVariable Long appointmentId) {
+    @ResponseStatus(HttpStatus.OK)
+    @Cacheable(value = "getAppointmentById", key = "#appointmentId")
+    public AppointmentDto getAppointmentById(@PathVariable Long appointmentId) {
         AppointmentDto appointmentDto = appointmentService.findAppointmentById(appointmentId);
-        return ResponseEntity.ok(appointmentDto);
+        return appointmentDto;
     }
 
     @DeleteMapping("/{appointmentId}")
-    public ResponseEntity<String> deleteAppointmentById(@PathVariable Long appointmentId) {
+    @ResponseStatus(HttpStatus.OK)
+    public String deleteAppointmentById(@PathVariable Long appointmentId) {
         appointmentService.deleteAppointmentById(appointmentId);
-        return ResponseEntity.ok(Responses.DELETED_APPOINTMENT.formatted(appointmentId));
+        return Responses.DELETED_APPOINTMENT.formatted(appointmentId);
     }
 
     @PatchMapping("/{appointmentId}")
-    public ResponseEntity<AppointmentDto> updateAppointment(@PathVariable Long appointmentId,
+    @ResponseStatus(HttpStatus.OK)
+    public AppointmentDto updateAppointment(@PathVariable Long appointmentId,
                                                             @Valid @RequestBody AppointmentUpdateDto updatedAppointment) {
         AppointmentDto appointmentDto = appointmentService.updateAppointment(appointmentId, updatedAppointment);
-        return ResponseEntity.ok(appointmentDto);
+        return appointmentDto;
     }
 
     @GetMapping("/listbyuser/{userId}")
-    public ResponseEntity<List<AppointmentDto>> getAllAppointmentByUserId(@PathVariable Long userId) {
+    @ResponseStatus(HttpStatus.OK)
+    public List<AppointmentDto> getAllAppointmentByUserId(@PathVariable Long userId) {
         List<AppointmentDto> appointmentList = appointmentService.findAllByUserId(userId);
-        return ResponseEntity.ok(appointmentList);
+        return appointmentList;
     }
 
     @GetMapping("/listbyclient/{clientId}")
-    public ResponseEntity<List<AppointmentDto>> getAllAppointmentByClientId(@PathVariable Long clientId) {
+    @ResponseStatus(HttpStatus.OK)
+    public List<AppointmentDto> getAllAppointmentByClientId(@PathVariable Long clientId) {
         List<AppointmentDto> appointmentList = appointmentService.findAllByClientId(clientId);
-        return ResponseEntity.ok(appointmentList);
+        return appointmentList;
     }
 
-    @PostMapping("/restore/{appointmentId}")
-    public ResponseEntity<AppointmentDto> restoreById(@PathVariable Long appointmentId) {
+    @PostMapping("/{appointmentId}/restore")
+    @ResponseStatus(HttpStatus.OK)
+    public AppointmentDto restoreById(@PathVariable Long appointmentId) {
         AppointmentDto appointmentDto = appointmentService.restoreById(appointmentId);
-        return new ResponseEntity<>(appointmentDto, HttpStatus.OK);
+        return appointmentDto;
     }
 
 }

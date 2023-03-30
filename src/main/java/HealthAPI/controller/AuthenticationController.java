@@ -6,6 +6,7 @@ import HealthAPI.dto.auth.RegisterRequest;
 import HealthAPI.service.AuthenticationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,18 +18,21 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/user")
-    public ResponseEntity<AuthenticationResponse> authUser(@RequestBody AuthenticationRequest request) {
-        return ResponseEntity.ok(authenticationService.authenticateUser(request));
+    @ResponseStatus(HttpStatus.OK)
+    public AuthenticationResponse authUser(@RequestBody AuthenticationRequest request) {
+        return authenticationService.authenticateUser(request);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(@Valid @RequestBody RegisterRequest request) {
-        return ResponseEntity.ok(authenticationService.register(request));
+    @ResponseStatus(HttpStatus.OK)
+    public AuthenticationResponse register (@Valid @RequestBody RegisterRequest request) {
+        return authenticationService.register(request);
     }
 
     @PostMapping("/client")
-    public ResponseEntity<AuthenticationResponse> authClient(@RequestBody AuthenticationRequest request) {
-        return ResponseEntity.ok(authenticationService.authenticateClient(request));
+    @ResponseStatus(HttpStatus.OK)
+    public AuthenticationResponse authClient(@RequestBody AuthenticationRequest request) {
+        return authenticationService.authenticateClient(request);
     }
 
 }

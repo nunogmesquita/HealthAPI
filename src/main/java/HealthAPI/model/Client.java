@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Client implements UserDetails, Serializable {
+public class Client implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,11 +54,14 @@ public class Client implements UserDetails, Serializable {
     @OneToMany
     private List <Token> tokens;
 
+    @Enumerated (EnumType.STRING)
+    private Role role;
+
     private boolean deleted;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(Client.class.toString()));
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override

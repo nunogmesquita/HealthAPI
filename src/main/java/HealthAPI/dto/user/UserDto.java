@@ -3,11 +3,13 @@ package HealthAPI.dto.user;
 import HealthAPI.model.Speciality;
 import lombok.*;
 
+import java.io.Serializable;
+
 @Builder
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDto {
+public class UserDto implements Serializable {
 
     private Long id;
 
