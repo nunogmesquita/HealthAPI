@@ -1,120 +1,34 @@
 package HealthAPI.service;
 
-import HealthAPI.converter.UserConverter;
 import HealthAPI.dto.user.ProfessionalDto;
 import HealthAPI.dto.user.UserCreateDto;
 import HealthAPI.dto.user.UserDto;
 import HealthAPI.dto.user.UserUpdateDto;
-import HealthAPI.exception.UserNotFound;
-import HealthAPI.messages.Responses;
-import HealthAPI.model.NullUtils;
-import HealthAPI.model.Speciality;
-import HealthAPI.model.User;
-import HealthAPI.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import static HealthAPI.model.Role.HEALTHCAREPROVIDER;
+public interface UserService {
 
-@Service
-public class UserService {
+    List<String> getAllServices();
 
-    private final UserRepository userRepository;
-    private final UserConverter userConverter;
+    List<ProfessionalDto> getAllProfessionals();
 
-    @Autowired
-    public UserService(UserRepository userRepository, UserConverter userConverter) {
-        this.userRepository = userRepository;
-        this.userConverter = userConverter;
-    }
+    UserDto createUser(UserCreateDto userCreatedDto);
 
-    public List<String> getAllServices() {
-        List<String> services = new ArrayList<>();
-        for (Speciality speciality : Speciality.values()) {
-            services.add(speciality.toString());
-        }
-        return services;
-    }
+    UserDto getUserByEmail(String userEmail);
 
-    public List<ProfessionalDto> getAllProfessionals() {
-        List<User> users = userRepository.findByRoleAndDeletedFalse(HEALTHCAREPROVIDER);
-        return users.parallelStream()
-                .map(userConverter::fromUserToProfessionalDto)
-                .toList();
-    }
+    UserDto updateUser(Long userId, UserUpdateDto userUpdateDto);
 
-    public UserDto createUser(UserCreateDto userCreatedDto) {
-        User user = userConverter.fromUserCreateDtoToUser(userCreatedDto);
-        user = userRepository.save(user);
-        return userConverter.fromUserToUserDto(user);
-    }
+    UserDto updateUser(String userEmail, UserUpdateDto userUpdateDto);
 
-    public UserDto getUserByEmail(String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow();
-        return userConverter.fromUserToUserDto(user);
-    }
+    List<UserDto> getAllUsers();
 
-    public UserDto updateUser(Long userId, UserUpdateDto userUpdateDto) {
-        User user = userRepository.findById(userId)
-                .orElseThrow();
-        NullUtils.updateIfPresent(user::setFirstName, userUpdateDto.getFirstName());
-        NullUtils.updateIfPresent(user::setLastName, userUpdateDto.getLastName());
-        NullUtils.updateIfPresent(user::setEmail, userUpdateDto.getEmail());
-        NullUtils.updateIfPresent(user::setPassword, userUpdateDto.getPassword());
-        NullUtils.updateIfPresent(user::setSpeciality, userUpdateDto.getSpeciality());
-        userRepository.save(user);
-        return userConverter.fromUserToUserDto(user);
-    }
+    UserDto getUserById(Long userId);
 
-    public UserDto updateUser(String userEmail, UserUpdateDto userUpdateDto) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow();
-        NullUtils.updateIfPresent(user::setFirstName, userUpdateDto.getFirstName());
-        NullUtils.updateIfPresent(user::setLastName, userUpdateDto.getLastName());
-        NullUtils.updateIfPresent(user::setEmail, userUpdateDto.getEmail());
-        NullUtils.updateIfPresent(user::setPassword, userUpdateDto.getPassword());
-        NullUtils.updateIfPresent(user::setSpeciality, userUpdateDto.getSpeciality());
-        userRepository.save(user);
-        return userConverter.fromUserToUserDto(user);
-    }
+    List<UserDto> getAllDeletedUsers();
 
-    public List<UserDto> getAllUsers() {
-        List<User> users = userRepository.findByDeletedFalse();
-        return users.parallelStream()
-                .map(userConverter::fromUserToUserDto)
-                .toList();
-    }
+    void deleteUser(Long userId);
 
-    public UserDto getUserById(Long userId) {
-        User user = userRepository.findByIdAndDeletedFalse(userId)
-                .orElseThrow(() -> new UserNotFound(Responses.USER_NOT_FOUND.formatted(userId)));
-        return userConverter.fromUserToUserDto(user);
+    void restoreUser(Long userId);
 
-    }
-
-    public List<UserDto> getAllDeletedUsers() {
-        List<User> users = userRepository.findByDeletedTrue();
-        return users.parallelStream()
-                .map(userConverter::fromUserToUserDto)
-                .toList();
-    }
-
-    public void deleteUser(Long userId) {
-        User user = userRepository.findByIdAndDeletedFalse(userId)
-                .orElseThrow(() -> new UserNotFound(Responses.USER_NOT_FOUND.formatted(userId)));
-        user.markAsDeleted();
-        userRepository.save(user);
-    }
-
-    public void restoreUser(Long userId) {
-        User user = userRepository.findByIdAndDeletedTrue(userId)
-                .orElseThrow(() -> new UserNotFound(Responses.USER_NOT_FOUND.formatted(userId)));
-        user.restore();
-        userRepository.save(user);
-    }
 }
