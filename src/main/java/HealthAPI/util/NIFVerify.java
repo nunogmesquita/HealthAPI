@@ -1,4 +1,4 @@
-package HealthAPI.service;
+package HealthAPI.util;
 
 public class NIFVerify {
 

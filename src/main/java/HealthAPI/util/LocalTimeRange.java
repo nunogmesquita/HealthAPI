@@ -1,4 +1,4 @@
-package HealthAPI.service;
+package HealthAPI.util;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
