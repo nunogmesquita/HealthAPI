@@ -9,7 +9,7 @@ This is a Java Spring Boot project that uses MySQL and Redis to build a REST API
 This API is designed to make CRUD operations within an health appointment system. 
 It also allows the registration and authentication of a given user or client.
 Healthcare providers (aka Users) can create TimeSlots and therefore, our clients can
-schedule appointments for a particular TimeSlot.
+schedule appointments for a particular slot.
 
 ### API Tools
 
