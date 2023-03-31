@@ -12,6 +12,7 @@ import HealthAPI.model.User;
 import HealthAPI.repository.UserRepository;
 import HealthAPI.util.NullUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserConverter userConverter;
+    private final PasswordEncoder passwordEncoder;
 
     public List<String> getAllServices() {
         List<String> services = new ArrayList<>();
@@ -43,6 +45,7 @@ public class UserServiceImpl implements UserService {
 
     public UserDto createUser(UserCreateDto userCreatedDto) {
         User user = userConverter.fromUserCreateDtoToUser(userCreatedDto);
+        user.setPassword(passwordEncoder.encode(userCreatedDto.getPassword()));
         user = userRepository.save(user);
         return userConverter.fromUserToUserDto(user);
     }

@@ -16,7 +16,7 @@ import java.time.LocalDate;
 public class RegisterRequest {
 
     @NotBlank(message = "Must have name.")
-    @Pattern(regexp = "^[A-Za-z]+$", message = "Please insert a valid name.")
+    @Pattern(regexp = "^[A-Za-z ]+$", message = "Please insert a valid name.")
     private String fullName;
 
     @NotBlank(message = "Must have email.")
@@ -44,11 +44,11 @@ public class RegisterRequest {
     private int NIF;
 
     @NotBlank(message = "Must have a street.")
-    @Pattern(regexp = "^[A-Za-z]+$", message = "Please insert a valid street.")
+    @Pattern(regexp = "^[A-Za-z ]+$", message = "Please insert a valid street.")
     private String street;
 
     @NotBlank(message = "Must have a city.")
-    @Pattern(regexp = "^[A-Za-z,]+$", message = "Please insert a valid city.")
+    @Pattern(regexp = "^[A-Za-z, ]+$", message = "Please insert a valid city.")
     private String city;
 
     @NotBlank(message = "Must have a zip code")

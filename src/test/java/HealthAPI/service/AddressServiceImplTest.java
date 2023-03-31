@@ -30,5 +30,5 @@ class AddressServiceImplTest {
         assertSame(address, addressServiceImpl.saveAddress(address));
         verify(addressRepository).save(Mockito.<Address>any());
     }
-}
 
+}

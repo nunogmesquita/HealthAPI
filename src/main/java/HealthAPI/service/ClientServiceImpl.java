@@ -35,7 +35,14 @@ public class ClientServiceImpl implements ClientService {
     public ClientDto updateClient(Long clientId, ClientUpdateDto clientUpdateDto) {
         Client client = clientRepository.findById(clientId)
                 .orElseThrow(ClientNotFound::new);
-
+        if (clientUpdateDto.getPhoneNumber() != 0 || Integer.toString(clientUpdateDto.getPhoneNumber()).matches("^[9][1236]\\d{7}$")) {
+            throw new InvalidPhoneNumber();
+        }
+        client.setPhoneNumber(clientUpdateDto.getPhoneNumber());
+        if (clientUpdateDto.getNIF() != 0 || Integer.toString(clientUpdateDto.getNIF()).matches("^\\d{9}$") || !verifyNif(clientUpdateDto.getNIF())) {
+            throw new InvalidNIF();
+        }
+        client.setNIF(clientUpdateDto.getNIF());
         NullUtils.updateIfPresent(client::setFullName, clientUpdateDto.getFullName());
         NullUtils.updateIfPresent(client::setPhoneNumber, clientUpdateDto.getPhoneNumber());
         NullUtils.updateIfPresent(client::setEmail, clientUpdateDto.getEmail());

@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class ClientUpdateDto {
 
-    @Pattern(regexp = "^[A-Za-z]+$", message = "Please insert a valid name.")
+    @Pattern(regexp = "^[A-Za-z ]+$", message = "Please insert a valid name.")
     private String fullName;
 
     @Pattern(regexp = "^((?!\\.)[\\w-_.]*[^.])(@\\w+)(\\.\\w+(\\.\\w+)?[^.\\W])$",

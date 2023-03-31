@@ -78,8 +78,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new NotOldEnough();
         } else if (Period.between(request.getBirthDate(), LocalDate.now()).getYears() > 120) {
             throw new TooOld(Period.between(request.getBirthDate(), LocalDate.now()).getYears());
-        } else if (!isNameValid(request.getFullName())) {
-            throw new InvalidName(request.getFullName());
         } else if (!Integer.toString(request.getPhoneNumber()).matches("^[9][1236]\\d{7}$")) {
             throw new InvalidPhoneNumber();
         } else if (!Integer.toString(request.getNIF()).matches("^\\d{9}$") || !verifyNif(request.getNIF())) {
@@ -101,11 +99,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
-    }
-
-    public boolean isNameValid(String name) {
-        String regex = "^[a-zA-Z]+$"; // only alphabets allowed
-        return name.matches(regex);
     }
 
     public AuthenticationResponse authenticateClient(AuthenticationRequest request) {

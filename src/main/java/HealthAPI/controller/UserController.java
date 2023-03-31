@@ -36,7 +36,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public UserDto getMyAccount(@NonNull HttpServletRequest header) {
         String userEmail = header.getUserPrincipal().getName();
-        if (!header.isUserInRole("ROLE_ADMIN") || !header.isUserInRole("ROLE_HEALTHCAREPROVIDER")) {
+        if ((header.getAttribute("ROLE")).toString().compareTo("VIEWER") == 0) {
             throw new UnauthorizedAction();
         }
         return userService.getUserByEmail(userEmail);
@@ -48,6 +48,9 @@ public class UserController {
     public UserDto updateMyAccount(@NonNull HttpServletRequest request,
                                    @Valid @RequestBody UserUpdateDto userUpdateDto) {
         String userEmail = request.getUserPrincipal().getName();
+        if ((request.getAttribute("ROLE")).toString().compareTo("VIEWER") == 0) {
+            throw new UnauthorizedAction();
+        }
         return userService.updateUser(userEmail, userUpdateDto);
     }
 

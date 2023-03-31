@@ -16,7 +16,7 @@ public class UserUpdateDto {
     @Pattern(regexp = "^[A-Za-z]+$", message = "Please insert a valid first name.")
     private String firstName;
 
-    @Pattern(regexp = "^[A-Za-z]+$", message = "Please insert a valid last name.")
+    @Pattern(regexp = "^[A-Za-z ]+$", message = "Please insert a valid last name.")
     private String lastName;
 
     @Pattern(regexp = "^((?!\\.)[\\w-_.]*[^.])(@\\w+)(\\.\\w+(\\.\\w+)?[^.\\W])$",

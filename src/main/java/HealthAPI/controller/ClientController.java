@@ -45,7 +45,7 @@ public class ClientController {
     @Cacheable(value = "viewMyAccount")
     public ClientDto viewMyAccount(@NonNull HttpServletRequest header) {
         String user = header.getUserPrincipal().getName();
-        if (!header.isUserInRole("ROLE_VIEWER")) {
+        if ((header.getAttribute("ROLE")).toString().compareTo("VIEWER") != 0) {
             throw new UnauthorizedAction();
         }
         return clientService.getClientByEmail(user);
@@ -57,6 +57,9 @@ public class ClientController {
     public ClientDto updateMyAccount(@NonNull HttpServletRequest header,
                                      @Valid @RequestBody ClientUpdateDto clientUpdateDto) {
         String clientEmail = header.getUserPrincipal().getName();
+        if ((header.getAttribute("ROLE")).toString().compareTo("VIEWER") != 0) {
+            throw new UnauthorizedAction();
+        }
         return clientService.updateClient(clientEmail, clientUpdateDto);
     }
 
