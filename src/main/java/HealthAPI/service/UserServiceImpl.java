@@ -10,6 +10,7 @@ import HealthAPI.exception.UserNotFound;
 import HealthAPI.model.Speciality;
 import HealthAPI.model.User;
 import HealthAPI.repository.UserRepository;
+import HealthAPI.util.NullUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

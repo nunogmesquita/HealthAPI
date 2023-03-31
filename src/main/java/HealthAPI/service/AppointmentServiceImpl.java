@@ -12,6 +12,7 @@ import HealthAPI.exception.AppointmentNotFound;
 import HealthAPI.exception.TimeSlotAlreadyBooked;
 import HealthAPI.model.*;
 import HealthAPI.repository.AppointmentRepository;
+import HealthAPI.util.NullUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

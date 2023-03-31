@@ -9,6 +9,7 @@ import HealthAPI.dto.user.UserDto;
 import HealthAPI.exception.*;
 import HealthAPI.model.*;
 import HealthAPI.repository.TimeSlotRepository;
+import HealthAPI.util.LocalTimeRange;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;

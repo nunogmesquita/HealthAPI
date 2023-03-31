@@ -9,12 +9,13 @@ import HealthAPI.exception.InvalidNIF;
 import HealthAPI.exception.InvalidPhoneNumber;
 import HealthAPI.model.Client;
 import HealthAPI.repository.ClientRepository;
+import HealthAPI.util.NullUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static HealthAPI.service.NIFVerify.verifyNif;
+import static HealthAPI.util.NIFVerify.verifyNif;
 
 @Service
 @RequiredArgsConstructor

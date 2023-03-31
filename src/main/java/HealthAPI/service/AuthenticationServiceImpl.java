@@ -20,7 +20,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
 
-import static HealthAPI.service.NIFVerify.verifyNif;
+import static HealthAPI.util.NIFVerify.verifyNif;
 
 @Service
 @RequiredArgsConstructor
