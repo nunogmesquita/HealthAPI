@@ -35,21 +35,22 @@ public class ClientServiceImpl implements ClientService {
     public ClientDto updateClient(Long clientId, ClientUpdateDto clientUpdateDto) {
         Client client = clientRepository.findById(clientId)
                 .orElseThrow(ClientNotFound::new);
-        if (clientUpdateDto.getPhoneNumber() != 0 || Integer.toString(clientUpdateDto.getPhoneNumber()).matches("^[9][1236]\\d{7}$")) {
-            throw new InvalidPhoneNumber();
+        if (clientUpdateDto.getPhoneNumber() != 0) {
+            if (Integer.toString(clientUpdateDto.getPhoneNumber()).matches("^[9][1236]\\d{7}$")) {
+                throw new InvalidPhoneNumber();
+            } else client.setPhoneNumber(clientUpdateDto.getPhoneNumber());
         }
-        client.setPhoneNumber(clientUpdateDto.getPhoneNumber());
-        if (clientUpdateDto.getNIF() != 0 || Integer.toString(clientUpdateDto.getNIF()).matches("^\\d{9}$") || !verifyNif(clientUpdateDto.getNIF())) {
-            throw new InvalidNIF();
+        if (clientUpdateDto.getNIF() != 0) {
+            if (Integer.toString(clientUpdateDto.getNIF()).matches("^\\d{9}$") || verifyNif(clientUpdateDto.getNIF())) {
+                throw new InvalidNIF();
+            } else client.setNIF(clientUpdateDto.getNIF());
         }
         client.setNIF(clientUpdateDto.getNIF());
         NullUtils.updateIfPresent(client::setFullName, clientUpdateDto.getFullName());
-        NullUtils.updateIfPresent(client::setPhoneNumber, clientUpdateDto.getPhoneNumber());
         NullUtils.updateIfPresent(client::setEmail, clientUpdateDto.getEmail());
         NullUtils.updateIfPresent(client::setPassword, clientUpdateDto.getPassword());
         NullUtils.updateIfPresent(client::setBirthDate, clientUpdateDto.getBirthDate());
         NullUtils.updateIfPresent(client::setGender, clientUpdateDto.getGender());
-        NullUtils.updateIfPresent(client::setNIF, clientUpdateDto.getNIF());
         NullUtils.updateIfPresent(client::setAddress, addressConverter.fromAddressDtoToAddress(clientUpdateDto.getAddressDto()));
         clientRepository.save(client);
         return clientConverter.fromClientToClientDto(client);
@@ -59,12 +60,12 @@ public class ClientServiceImpl implements ClientService {
         Client client = clientRepository.findByEmail(clientEmail)
                 .orElseThrow(ClientNotFound::new);
         if (clientUpdateDto.getPhoneNumber() != 0) {
-            if (!Integer.toString(clientUpdateDto.getPhoneNumber()).matches("^[9][1236]\\d{7}$")) {
+            if (Integer.toString(clientUpdateDto.getPhoneNumber()).matches("^[9][1236]\\d{7}$")) {
                 throw new InvalidPhoneNumber();
             } else client.setPhoneNumber(clientUpdateDto.getPhoneNumber());
         }
         if (clientUpdateDto.getNIF() != 0) {
-            if (!Integer.toString(clientUpdateDto.getNIF()).matches("^\\d{9}$") || !verifyNif(clientUpdateDto.getNIF())) {
+            if (Integer.toString(clientUpdateDto.getNIF()).matches("^\\d{9}$") || verifyNif(clientUpdateDto.getNIF())) {
                 throw new InvalidNIF();
             } else client.setNIF(clientUpdateDto.getNIF());
         }

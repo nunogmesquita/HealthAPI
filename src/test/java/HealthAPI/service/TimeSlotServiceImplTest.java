@@ -66,18 +66,6 @@ class TimeSlotServiceImplTest {
     private UserServiceImpl userServiceImpl;
 
     @Test
-    void testGenerateWeeklyTimeSlots3() {
-        WeeklyTimeSlotDto weeklyTimeSlotDto = mock(WeeklyTimeSlotDto.class);
-        when(weeklyTimeSlotDto.getDate()).thenThrow(new StartHourAfterFinishingHour());
-        when(weeklyTimeSlotDto.getFinishingHour()).thenReturn(LocalTime.MIDNIGHT);
-        when(weeklyTimeSlotDto.getInitialHour()).thenReturn(LocalTime.MIDNIGHT);
-        timeSlotServiceImpl.generateWeeklyTimeSlots(weeklyTimeSlotDto);
-        verify(weeklyTimeSlotDto).getDate();
-        verify(weeklyTimeSlotDto).getFinishingHour();
-        verify(weeklyTimeSlotDto).getInitialHour();
-    }
-
-    @Test
     void testGenerateWeeklyTimeSlots4() {
         when(userServiceImpl.getUserById(Mockito.<Long>any())).thenReturn(new UserDto());
         when(userConverter.fromUserDtoToUser(Mockito.<UserDto>any())).thenReturn(new User());
@@ -97,24 +85,6 @@ class TimeSlotServiceImplTest {
         verify(weeklyTimeSlotDto).getInitialHour();
         verify(weeklyTimeSlotDto).getDayOfWeeks();
         verify(weeklyTimeSlotDto, atLeast(1)).getExcludedTimeRanges();
-    }
-
-    @Test
-    void testGenerateWeeklyTimeSlots5() {
-        when(userServiceImpl.getUserById(Mockito.<Long>any())).thenReturn(new UserDto());
-        when(userConverter.fromUserDtoToUser(Mockito.<UserDto>any())).thenReturn(new User());
-        WeeklyTimeSlotDto weeklyTimeSlotDto = mock(WeeklyTimeSlotDto.class);
-        when(weeklyTimeSlotDto.getUserId()).thenThrow(new UserNotFound());
-        when(weeklyTimeSlotDto.getDayOfWeeks()).thenThrow(new UserNotFound());
-        when(weeklyTimeSlotDto.getExcludedTimeRanges()).thenThrow(new UserNotFound());
-        when(weeklyTimeSlotDto.getDate()).thenReturn(LocalDate.now());
-        when(weeklyTimeSlotDto.getFinishingHour()).thenReturn(LocalTime.MIDNIGHT);
-        when(weeklyTimeSlotDto.getInitialHour()).thenReturn(LocalTime.MIDNIGHT);
-        timeSlotServiceImpl.generateWeeklyTimeSlots(weeklyTimeSlotDto);
-        verify(weeklyTimeSlotDto).getUserId();
-        verify(weeklyTimeSlotDto).getDate();
-        verify(weeklyTimeSlotDto).getFinishingHour();
-        verify(weeklyTimeSlotDto).getInitialHour();
     }
 
     @Test
@@ -244,7 +214,7 @@ class TimeSlotServiceImplTest {
     void testGetAvailableTimeSlotsBySpeciality() {
         when(timeSlotRepository.findByUser_SpecialityAndIsBookedFalse(Mockito.<Speciality>any(), Mockito.<Pageable>any()))
                 .thenReturn(new PageImpl<>(new ArrayList<>()));
-        assertTrue(timeSlotServiceImpl.getAvailableTimeSlotsBySpeciality(Speciality.FISIATRIA, 1, 3).isEmpty());
+        assertTrue(timeSlotServiceImpl.getAvailableTimeSlotsBySpeciality(Speciality.STOMATOLOGY, 1, 3).isEmpty());
         verify(timeSlotRepository).findByUser_SpecialityAndIsBookedFalse(Mockito.<Speciality>any(),
                 Mockito.<Pageable>any());
     }

@@ -22,7 +22,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="HealthAPI" target="19" />
+      <module name="HealthAPI" target="17" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">

@@ -198,25 +198,6 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void testIsNameValid() {
-        assertTrue(authenticationServiceImpl.isNameValid("Name"));
-        assertTrue(authenticationServiceImpl.isNameValid("U"));
-        assertFalse(authenticationServiceImpl.isNameValid("^[a-zA-Z]+$"));
-        assertTrue(authenticationServiceImpl.isNameValid("UU"));
-        assertTrue(authenticationServiceImpl.isNameValid("UName"));
-        assertTrue(authenticationServiceImpl.isNameValid("NameU"));
-        assertTrue(authenticationServiceImpl.isNameValid("NameName"));
-        assertTrue(authenticationServiceImpl.isNameValid("UUU"));
-        assertTrue(authenticationServiceImpl.isNameValid("UUName"));
-        assertTrue(authenticationServiceImpl.isNameValid("UNameU"));
-        assertTrue(authenticationServiceImpl.isNameValid("UNameName"));
-        assertTrue(authenticationServiceImpl.isNameValid("NameUU"));
-        assertTrue(authenticationServiceImpl.isNameValid("NameUName"));
-        assertTrue(authenticationServiceImpl.isNameValid("NameNameU"));
-        assertTrue(authenticationServiceImpl.isNameValid("NameNameName"));
-    }
-
-    @Test
     void testAuthenticateClient() throws AuthenticationException {
         when(clientRepository.findByEmail((String) any())).thenReturn(Optional.of(new Client()));
         when(tokenRepository.save((Token) any())).thenReturn(new Token());

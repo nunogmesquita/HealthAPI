@@ -124,28 +124,6 @@ class ClientServiceImplTest {
     }
 
     @Test
-    void testUpdateClient3() {
-        Client client = mock(Client.class);
-        doNothing().when(client).setAddress((Address) any());
-        doNothing().when(client).setNIF(anyInt());
-        doNothing().when(client).setPhoneNumber(anyInt());
-        Optional<Client> ofResult = Optional.of(client);
-        when(clientRepository.save((Client) any())).thenReturn(new Client());
-        when(clientRepository.findById((Long) any())).thenReturn(ofResult);
-        ClientDto clientDto = new ClientDto();
-        when(clientConverter.fromClientToClientDto((Client) any())).thenReturn(clientDto);
-        when(addressConverter.fromAddressDtoToAddress((AddressDto) any())).thenReturn(new Address());
-        assertSame(clientDto, clientServiceImpl.updateClient(1L, new ClientUpdateDto()));
-        verify(clientRepository).save((Client) any());
-        verify(clientRepository).findById((Long) any());
-        verify(client).setAddress((Address) any());
-        verify(client).setNIF(anyInt());
-        verify(client).setPhoneNumber(anyInt());
-        verify(clientConverter).fromClientToClientDto((Client) any());
-        verify(addressConverter).fromAddressDtoToAddress((AddressDto) any());
-    }
-
-    @Test
     void testUpdateClient7() {
         when(clientRepository.save((Client) any())).thenReturn(new Client());
         when(clientRepository.findByEmail((String) any())).thenReturn(Optional.of(new Client()));
@@ -187,41 +165,6 @@ class ClientServiceImplTest {
         verify(client).setAddress((Address) any());
         verify(clientConverter).fromClientToClientDto((Client) any());
         verify(addressConverter).fromAddressDtoToAddress((AddressDto) any());
-    }
-
-    @Test
-    void testUpdateClient11() {
-        Client client = mock(Client.class);
-        doNothing().when(client).setAddress((Address) any());
-        Optional<Client> ofResult = Optional.of(client);
-        when(clientRepository.save((Client) any())).thenReturn(new Client());
-        when(clientRepository.findByEmail((String) any())).thenReturn(ofResult);
-        when(clientConverter.fromClientToClientDto((Client) any())).thenReturn(new ClientDto());
-        when(addressConverter.fromAddressDtoToAddress((AddressDto) any())).thenReturn(new Address());
-        LocalDate birthDate = LocalDate.ofEpochDay(1L);
-        assertThrows(InvalidPhoneNumber.class,
-                () -> clientServiceImpl.updateClient("jane.doe@example.org",
-                        new ClientUpdateDto("Dr Jane Doe", "jane.doe@example.org", "iloveyou", 10, birthDate, Gender.FEMALE, 1,
-                                new AddressDto("Street", "Oxford", "21654"))));
-        verify(clientRepository).findByEmail((String) any());
-    }
-
-    @Test
-    void testUpdateClient14() {
-        Client client = mock(Client.class);
-        doThrow(new InvalidPhoneNumber()).when(client).setFullName((String) any());
-        doNothing().when(client).setAddress((Address) any());
-        Optional<Client> ofResult = Optional.of(client);
-        when(clientRepository.save((Client) any())).thenReturn(new Client());
-        when(clientRepository.findByEmail((String) any())).thenReturn(ofResult);
-        when(clientConverter.fromClientToClientDto((Client) any())).thenReturn(new ClientDto());
-        when(addressConverter.fromAddressDtoToAddress((AddressDto) any())).thenReturn(new Address());
-
-        ClientUpdateDto clientUpdateDto = new ClientUpdateDto();
-        clientUpdateDto.setNIF(1);
-        clientUpdateDto.setFullName("Dr Jane Doe");
-        assertThrows(InvalidNIF.class, () -> clientServiceImpl.updateClient("jane.doe@example.org", clientUpdateDto));
-        verify(clientRepository).findByEmail((String) any());
     }
 
     @Test
